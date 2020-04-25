@@ -1,0 +1,49 @@
+# NMakefile for compiling the linxaudio modules and graph to x86 obj files.
+# There are separate versions of cl.exe to build x86 or x64 binaries. This
+# makefile assumes to be invoked with the 32 bit tools on the PATH.
+
+OBJPATH = ..\..\lib\cl-x86
+OBJEXT = obj
+CRTPATH = crt
+CFLAGS = /nologo /c /GS- /MD /O2 /Oi /Oy /fp:fast /arch:IA32 /DNDEBUG /Icrt/include /Fo$(OBJPATH)/
+
+!include crt\crt-targets.nmake
+
+MODULE_TARGETS = \
+	$(OBJPATH)\adsrvalue.$(OBJEXT) \
+	$(OBJPATH)\arithmeticvalue.$(OBJEXT) \
+	$(OBJPATH)\clip.$(OBJEXT) \
+	$(OBJPATH)\oscbuffer.$(OBJEXT) \
+	$(OBJPATH)\container.$(OBJEXT) \
+	$(OBJPATH)\polycontainer.$(OBJEXT) \
+	$(OBJPATH)\delay.$(OBJEXT) \
+	$(OBJPATH)\distortion.$(OBJEXT) \
+	$(OBJPATH)\envscale.$(OBJEXT) \
+	$(OBJPATH)\gain.$(OBJEXT) \
+	$(OBJPATH)\inertia.$(OBJEXT) \
+	$(OBJPATH)\lfovalue.$(OBJEXT) \
+	$(OBJPATH)\midinotesplit.$(OBJEXT) \
+	$(OBJPATH)\notefrequency.$(OBJEXT) \
+	$(OBJPATH)\svf.$(OBJEXT) \
+	$(OBJPATH)\uservalue.$(OBJEXT) \
+	$(OBJPATH)\biquad.$(OBJEXT)
+
+GRAPH_TARGETS = \
+	$(OBJPATH)\graph.$(OBJEXT) \
+	$(OBJPATH)\buzzhost.$(OBJEXT) \
+	$(OBJPATH)\vsthost.$(OBJEXT) \
+	$(OBJPATH)\commonhost.$(OBJEXT) \
+	$(OBJPATH)\thiscall.$(OBJEXT)
+
+all: $(CRT_X86_TARGETS) $(MODULE_TARGETS) $(GRAPH_TARGETS)
+
+clean:
+	del $(CRT_X86_TARGETS) $(MODULE_TARGETS) $(GRAPH_TARGETS)
+
+rebuild: clean all
+
+$(MODULE_TARGETS) $(GRAPH_TARGETS): $(@B).c
+	@if not exist $(OBJPATH) mkdir $(OBJPATH)
+	cl $(CFLAGS) $**
+
+!include crt\crt-rules.nmake

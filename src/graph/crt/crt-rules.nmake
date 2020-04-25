@@ -1,0 +1,58 @@
+# Nmake include file for building the CRT as part of another Nmake project.
+
+$(CRT_STRING_TARGETS): $(CRTPATH)/string/$(@B).c
+	@if not exist $(OBJPATH) mkdir $(OBJPATH)
+	cl $(CFLAGS) $**
+
+$(CRT_SYS_TARGETS): $(CRTPATH)/sys/$(@B).c
+	@if not exist $(OBJPATH) mkdir $(OBJPATH)
+	cl $(CFLAGS) $**
+
+# CRT math functions for multiple architectures
+# NOTE: the source files are listed as dependencies to trigger rebuilds, but 
+# are not built directly by nmake.
+
+CRT_MATH_SOURCES = \
+	$(CRTPATH)/math/fltused.c \
+	$(CRTPATH)/math/fminf.c \
+	$(CRTPATH)/math/fmaxf.c
+
+CRT_MATH_X64_SOURCES = \
+	$(CRT_MATH_SOURCES) \
+	$(CRTPATH)/math/sse2/sinf4.c \
+	$(CRTPATH)/math/sse2/cosf4.c \
+	$(CRTPATH)/math/sse2/tanf4.c \
+	$(CRTPATH)/math/sse2/logf4.c \
+	$(CRTPATH)/math/sse2/log10f4.c \
+	$(CRTPATH)/math/sse2/expf4.c \
+	$(CRTPATH)/math/sse2/powf4.c \
+	$(CRTPATH)/math/sse2/math_sse2.c \
+	$(CRTPATH)/math/sse2/math_sse2.h
+
+CRT_MATH_X86_SOURCES = \
+	$(CRT_MATH_SOURCES) \
+	$(CRTPATH)/math/x87/msvcsupp.c
+
+CRT_MATH_X86_SSE2_SOURCES = \
+	$(CRT_MATH_SOURCES) \
+	$(CRTPATH)/math/sse2/sinf4.c \
+	$(CRTPATH)/math/sse2/cosf4.c \
+	$(CRTPATH)/math/sse2/tanf4.c \
+	$(CRTPATH)/math/sse2/logf4.c \
+	$(CRTPATH)/math/sse2/log10f4.c \
+	$(CRTPATH)/math/sse2/expf4.c \
+	$(CRTPATH)/math/sse2/powf4.c \
+	$(CRTPATH)/math/sse2/math_sse2.c \
+	$(CRTPATH)/math/sse2/math_sse2.h
+
+$(CRT_MATH_X64_TARGET): $(CRTPATH)/math/$(@B).c $(CRT_MATH_X64_SOURCES)
+	@if not exist $(OBJPATH) mkdir $(OBJPATH)
+	cl $(CFLAGS) $(CRTPATH)/math/$(@B).c
+
+$(CRT_MATH_X86_TARGET): $(CRTPATH)/math/$(@B).c $(CRT_MATH_X86_SOURCES)
+	@if not exist $(OBJPATH) mkdir $(OBJPATH)
+	cl $(CFLAGS) $(CRTPATH)/math/$(@B).c
+
+$(CRT_MATH_X86_SSE2_TARGET): $(CRTPATH)/math/$(@B).c $(CRT_MATH_X86_SSE2_SOURCES)
+	@if not exist $(OBJPATH) mkdir $(OBJPATH)
+	cl $(CFLAGS) $(CRTPATH)/math/$(@B).c

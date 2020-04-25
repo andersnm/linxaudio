@@ -1,0 +1,194 @@
+<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.9.1/styles/default.min.css">
+<script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.9.1/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<h1>Implementing a module in C</h1>
+
+<h2>Guidelines</h2>
+<p>Modules are intended to be hyper portable and capable of running in any environment. </p>
+<ul>
+	<li>plain C</li>
+	<li>no external libraries, only math and string functions from the C standard library</li>
+	<li>max 256 samples internal buffer sise</li>
+	<li>max 256 queued events per vertex</li>
+</ul>
+
+<h2>Module factory definition</h2>
+<p>
+	Every module must populate a global instance of a struct linx_factory as the entry point to the framework:
+</p>
+<pre><code>struct linx_factory {
+	unsigned int version_size;
+	const char* name;
+	unsigned int flags;
+	unsigned int pin_count;
+	struct linx_pin* pins;
+	unsigned int subgraph_pin_count;
+	struct linx_pin* subgraph_pins;
+	linx_create_functype* create;
+	linx_destroy_functype* destroy;
+	linx_process_functype* process;
+	linx_describe_value_functype* describe_value;
+};
+</code></pre>
+
+<p>
+	The module factory instance must be made available in two specific ways to be used depending on the environment.
+	Linxgen looks for the factory data symbol "modulename_factory" directly in the module's compiled .obj file symbol table.
+	Javascript calls the C function "modulename_get_factory()" to get the factory. For example, the declaration of the gain module
+	looks like this:
+</p>
+<pre><code>struct linx_factory gain_factory = {
+	sizeof(struct linx_factory), "Gain", 0,
+	(sizeof(gain_pins) / sizeof(struct linx_pin)), gain_pins,
+	0, 0,
+	gain_create, gain_destroy, gain_process, gain_describe_value
+};
+
+struct linx_factory* gain_get_factory() {
+	return &gain_factory;
+}
+</code></pre>
+<p>
+	This implies module factories cannot be created dynamically because Linxgen requires all factories to exist as C symbols at link-time.
+</p>
+
+<h2>Module pins</h2>
+<p>
+	Module pins are declared as an array of struct linx_pin and referenced in the module factory definition:
+</p>
+<pre><code>struct linx_pin gain_pins[] = {
+	// pin name, pin type, min value, max value, default value, precision
+	{ "In", linx_pin_type_in_buffer_float },
+	{ "Out", linx_pin_type_out_buffer_float },
+	{ "Amp", linx_pin_type_in_scalar_float, 0.0f, 4.0f, 1.0f, 0.01f }
+};
+</code></pre>
+<p>
+	The min, max and precision values can be used by hosts for render hints, but are not used directly by the audio engine. The default value
+	will be used for initialisation unless an overriding init value was specified for the module instance pin in the graph defintion.
+</p>
+<p>
+	Valid values for the pin type are:
+</p>
+<pre><code>enum linx_pin_type {
+	linx_pin_type_in_scalar_float,
+	linx_pin_type_out_scalar_float,
+	linx_pin_type_in_scalar_int,
+	linx_pin_type_out_scalar_int,
+	linx_pin_type_in_midi,
+	linx_pin_type_out_midi,
+	linx_pin_type_in_buffer_float,
+	linx_pin_type_out_buffer_float,
+};
+</code></pre>
+<h2>Module callbacks</h2>
+<p>
+	The module factory must be initialised with function pointers implementing the module: create, destroy, process, describe_value.
+</p>
+<pre><code>// populate module specific user data for the vertex instance
+typedef void (linx_create_functype)(struct linx_vertex_instance*, int samplerate);
+
+// free user data for the vertex instance
+typedef void (linx_destroy_functype)(struct linx_vertex_instance*);
+
+// process audio samples
+typedef void(linx_process_functype)(struct linx_vertex_instance* self, struct linx_value_array* in_values, 
+	struct linx_buffer* pin_buffers, struct linx_value_array* out_values, int sample_count);
+
+// return a string describing a pin value
+typedef void(linx_describe_value_functype)(struct linx_vertex_instance* self, int pin_index, float value, char* result_name, int result_name_size);
+</code></pre>
+
+<h2>Full source code of of gain.c</h2>
+
+<pre><code>
+#define _USE_MATH_DEFINES
+#include &lt;stdlib.h>
+#include &lt;math.h>
+#include &lt;string.h>
+#include &lt;stdio.h>
+#include &lt;assert.h>
+#include "linxaudio.h"
+#include "inertia.h"
+
+struct linx_pin gain_pins[] = {
+	{ "In", linx_pin_type_in_buffer_float },
+	{ "Out", linx_pin_type_out_buffer_float },
+	{ "Amp", linx_pin_type_in_scalar_float, 0.0f, 4.0f, 1.0f, 0.01f }
+};
+
+struct gain {
+	inertia_value_t a;
+	float samplerate;
+};
+
+void gain_process(struct linx_vertex_instance* self, struct linx_value_array* in_values, struct linx_buffer* pin_buffers, struct linx_value_array* out_values, int sample_count) {
+	int i;
+	struct gain* data = (struct gain*)self->data;
+	struct linx_buffer* in_buffer = &pin_buffers[0];
+	struct linx_buffer* out_buffer = &pin_buffers[1];
+
+	for (i = 0; i < in_values->length; i++) {
+		struct linx_value* v = &in_values->items[i];
+		if (v->pin_group == linx_pin_group_module && v->pin_index == 2) {
+			inertia_set_ms(&data->a, 1, data->samplerate, v->floatvalue);
+		}
+	}
+
+	if (in_buffer->write_count > 0) {
+		if (data->a.current != 0) {
+			for (i = 0; i < sample_count; i++) {
+				inertia_update(&data->a);
+				out_buffer->float_buffer[i] = in_buffer->float_buffer[i] * data->a.current;
+			}
+
+			out_buffer->write_count = 1;
+		} else {
+			for (i = 0; i < sample_count; i++) {
+				inertia_update(&data->a);
+			}
+		}
+	} else {
+		data->a.frames = 0;
+	}
+}
+
+float amptodb (float amp) { 
+	return log10f(amp) * 20.f; 
+}
+
+void gain_describe_value(struct linx_vertex_instance* self, int pin_index, float value, char* result_name, int result_name_size) {
+	switch (pin_index) {
+		case 2:
+			snprintf(result_name, result_name_size, "%i%% (%.2f dB)", (int)(value * 100.0f), amptodb(value));
+			break;
+	}
+}
+
+void gain_create(struct linx_vertex_instance* plugin, int samplerate) {
+	struct gain* gain = (struct gain*)malloc(sizeof(struct gain));
+	memset(gain, 0, sizeof(struct gain));
+	gain->a.current = 1.0f;
+	gain->samplerate = (float)samplerate;
+	inertia_set_ms(&gain->a, 1, gain->samplerate, 1);
+	plugin->data = gain;
+}
+
+void gain_destroy(struct linx_vertex_instance* plugin) {
+	struct gain* data = (struct gain*)plugin->data;
+	free(data);
+}
+
+struct linx_factory gain_factory = {
+	sizeof(struct linx_factory), "Gain", 0,
+	(sizeof(gain_pins) / sizeof(struct linx_pin)), gain_pins,
+	0, 0,
+	gain_create, gain_destroy, gain_process, gain_describe_value
+};
+
+struct linx_factory* gain_get_factory() {
+	return &gain_factory;
+}
+
+</code></pre>

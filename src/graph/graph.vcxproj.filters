@@ -1,0 +1,116 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="graph.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="container.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="svf.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="vsthost.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="oscbuffer.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="delay.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="adsrvalue.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="gain.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="midinotesplit.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="buzzhost.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="thiscall.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="commonhost.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="biquad.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lfovalue.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="arithmeticvalue.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="uservalue.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="designer.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="distortion.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="notefrequency.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="inertia.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="envscale.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="clip.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="crt\sys\mman.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="polycontainer.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="phatman.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="stereocontainer.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sequencer.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="kickxp.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="buzzhost.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="thiscall.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="commonhost.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="linxaudio.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inertia.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

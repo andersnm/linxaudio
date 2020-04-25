@@ -1,0 +1,728 @@
+{
+  "system": {
+    "uniqueId": "NOID",
+    "product": "SimpleReverb",
+    "author": "Andyw",
+    "myjsonId": ""
+  },
+  "factories": [
+    {
+      "name": "svf",
+      "symbol": "svf_factory",
+      "file": "svf.obj",
+      "deps": []
+    },
+    {
+      "name": "delay",
+      "symbol": "delay_factory",
+      "file": "delay.obj",
+      "deps": []
+    },
+    {
+      "name": "gain",
+      "symbol": "gain_factory",
+      "file": "gain.obj",
+      "deps": [
+        "inertia.obj"
+      ]
+    },
+    {
+      "name": "oscbuffer",
+      "symbol": "oscbuffer_factory",
+      "file": "oscbuffer.obj",
+      "deps": [
+        "inertia.obj"
+      ]
+    },
+    {
+      "name": "midinote",
+      "symbol": "midinotesplit_factory",
+      "file": "midinotesplit.obj",
+      "deps": []
+    },
+    {
+      "name": "adsrvalue",
+      "symbol": "adsrvalue_factory",
+      "file": "adsrvalue.obj",
+      "deps": []
+    },
+    {
+      "name": "uservalue_f0_1",
+      "symbol": "uservalue_f0_1_factory",
+      "file": "uservalue.obj",
+      "deps": []
+    },
+    {
+      "name": "uservalue_hertz",
+      "symbol": "uservalue_hertz_factory",
+      "file": "uservalue.obj",
+      "deps": []
+    }
+  ],
+  "targets": [
+    {
+      "name": "plain-win32",
+      "arch": "i386",
+      "postfix": ".dll",
+      "deps": [
+        "math_x86.obj",
+        "graph.obj",
+        "ftol2.obj",
+        "chkstk.obj",
+        "memcpy.obj",
+        "memset.obj"
+      ],
+      "exports": [
+        "linx_host_get_graph"
+      ],
+      "paths": [
+        "lib/cl-x86"
+      ]
+    },
+    {
+      "name": "vst-win32",
+      "arch": "i386",
+      "postfix": "VST.dll",
+      "deps": [
+        "vsthost.obj",
+        "commonhost.obj",
+        "math_x86.obj",
+        "graph.obj",
+        "ftol2.obj",
+        "chkstk.obj",
+        "memcpy.obj",
+        "memset.obj"
+      ],
+      "exports": [
+        "VSTPluginMain",
+        "linx_host_get_graph"
+      ],
+      "paths": [
+        "lib/cl-x86"
+      ]
+    },
+    {
+      "name": "vst-win64",
+      "arch": "x64",
+      "postfix": "VST64.dll",
+      "deps": [
+        "vsthost.obj",
+        "commonhost.obj",
+        "math_sse.obj",
+        "fminfmax.obj",
+        "graph.obj",
+        "chkstk.obj",
+        "memcpy.obj",
+        "memset.obj"
+      ],
+      "exports": [
+        "VSTPluginMain",
+        "linx_host_get_graph"
+      ],
+      "paths": [
+        "lib/cl-x64"
+      ]
+    },
+    {
+      "name": "buzz-win32",
+      "arch": "i386",
+      "postfix": "Buzz.dll",
+      "deps": [
+        "buzzhost.obj",
+        "commonhost.obj",
+        "math_x86.obj",
+        "graph.obj",
+        "ftol2.obj",
+        "chkstk.obj",
+        "memcpy.obj",
+        "memset.obj",
+        "thiscall.obj",
+        "mman.obj"
+      ],
+      "exports": [
+        "GetInfo",
+        "CreateMachine",
+        "linx_host_get_graph"
+      ],
+      "paths": [
+        "lib/cl-x86"
+      ]
+    }
+  ],
+  "graph": {
+    "vertices": [
+      {
+        "name": "delay",
+        "factory": "delay",
+        "subgraph": "subgraph0",
+        "values": {
+          "DelayMs": 36.667,
+          "DryGain": 1,
+          "Feedback": 0.4,
+          "WetGain": 1
+        },
+        "x": -0.4714494875549049,
+        "y": -0.35304347826086957
+      },
+      {
+        "name": "delay2",
+        "factory": "delay",
+        "subgraph": "subgraph1",
+        "values": {
+          "DelayMs": 35.306,
+          "DryGain": 1,
+          "WetGain": 1,
+          "Feedback": 0.26
+        },
+        "x": -0.23865300146412893,
+        "y": -0.36347826086956525
+      },
+      {
+        "name": "delay3",
+        "factory": "delay",
+        "subgraph": "subgraph2",
+        "values": {
+          "DryGain": 1,
+          "DelayMs": 33.81,
+          "WetGain": 1,
+          "Feedback": 0.47
+        },
+        "x": 0.004392386530014725,
+        "y": -0.342608695652174
+      },
+      {
+        "name": "delay4",
+        "factory": "delay",
+        "subgraph": "subgraph3",
+        "values": {
+          "DryGain": 1,
+          "DelayMs": 32.245,
+          "WetGain": 1,
+          "Feedback": 0.43
+        },
+        "x": 0.26939970717423134,
+        "y": -0.3495652173913043
+      },
+      {
+        "name": "gain",
+        "factory": "gain",
+        "subgraph": null,
+        "values": {
+          "Amp": 0.5
+        },
+        "x": -0.061493411420205035,
+        "y": -0.6555658647103247
+      },
+      {
+        "name": "oscbuffer",
+        "factory": "oscbuffer",
+        "subgraph": null,
+        "values": {
+          "Waveform": 2,
+          "Amp": 0
+        },
+        "x": -0.07320644216691075,
+        "y": -0.8652368108749595
+      },
+      {
+        "name": "midinote",
+        "factory": "midinote",
+        "subgraph": null,
+        "values": {},
+        "x": -0.452415812591508,
+        "y": -0.8766468874743768
+      },
+      {
+        "name": "adsrvalue",
+        "factory": "adsrvalue",
+        "subgraph": null,
+        "values": {
+          "Attack": 60,
+          "Release": 79,
+          "Sustain": 1,
+          "Decay": 97
+        },
+        "x": -0.3660322108345535,
+        "y": -0.6416528212320639
+      },
+      {
+        "name": "delay5",
+        "factory": "delay",
+        "subgraph": "subgraph4",
+        "values": {
+          "DelayMs": 5.102,
+          "Feedback": 0.45,
+          "WetGain": 1,
+          "DryGain": 0
+        },
+        "x": -0.10102489019033667,
+        "y": -0.09217391304347833
+      },
+      {
+        "name": "delay6",
+        "factory": "delay",
+        "subgraph": "subgraph5",
+        "values": {
+          "DelayMs": 12.608,
+          "WetGain": 1,
+          "Feedback": 0.45,
+          "DryGain": 0
+        },
+        "x": -0.10102489019033678,
+        "y": 0.13739130434782587
+      },
+      {
+        "name": "delay7",
+        "factory": "delay",
+        "subgraph": "subgraph6",
+        "values": {
+          "DelayMs": 10,
+          "Feedback": 0.43,
+          "WetGain": 1,
+          "DryGain": 0
+        },
+        "x": -0.0980966325036603,
+        "y": 0.3600000000000001
+      },
+      {
+        "name": "delay8",
+        "factory": "delay",
+        "subgraph": "subgraph7",
+        "values": {
+          "DelayMs": 7.732,
+          "Feedback": 0.46,
+          "WetGain": 1,
+          "DryGain": 0
+        },
+        "x": -0.10688140556368964,
+        "y": 0.5513043478260871
+      },
+      {
+        "name": "uservalue_f0_1",
+        "factory": "uservalue_f0_1",
+        "subgraph": null,
+        "values": {
+          "In": 0.86
+        },
+        "x": 0.2796486090775987,
+        "y": -0.777391304347826
+      },
+      {
+        "name": "uservalue_f0_12",
+        "factory": "uservalue_f0_1",
+        "subgraph": null,
+        "values": {
+          "In": 0.22
+        },
+        "x": -0.705710102489019,
+        "y": 0.14086956521739147
+      },
+      {
+        "name": "uservalue_hertz",
+        "factory": "uservalue_hertz",
+        "subgraph": null,
+        "values": {
+          "In": 2595
+        },
+        "x": 0.5563689604685211,
+        "y": -0.7669565217391304
+      },
+      {
+        "name": "gain2",
+        "factory": "gain",
+        "subgraph": null,
+        "values": {},
+        "x": 0.14641288433382127,
+        "y": 0.4540942928039702
+      }
+    ],
+    "edges": [
+      {
+        "from_vertex": "midinote",
+        "from_pin": "OutTrigger",
+        "to_vertex": "adsrvalue",
+        "to_pin": "Trigger"
+      },
+      {
+        "from_vertex": "adsrvalue",
+        "from_pin": "Out",
+        "to_vertex": "oscbuffer",
+        "to_pin": "Amp"
+      },
+      {
+        "from_vertex": "midinote",
+        "from_pin": "OutFreq",
+        "to_vertex": "oscbuffer",
+        "to_pin": "Frequency"
+      },
+      {
+        "from_vertex": "oscbuffer",
+        "from_pin": "Out",
+        "to_vertex": "gain",
+        "to_pin": "In"
+      },
+      {
+        "from_vertex": "gain",
+        "from_pin": "Out",
+        "to_vertex": "delay",
+        "to_pin": "In"
+      },
+      {
+        "from_vertex": "gain",
+        "from_pin": "Out",
+        "to_vertex": "delay2",
+        "to_pin": "In"
+      },
+      {
+        "from_vertex": "gain",
+        "from_pin": "Out",
+        "to_vertex": "delay3",
+        "to_pin": "In"
+      },
+      {
+        "from_vertex": "gain",
+        "from_pin": "Out",
+        "to_vertex": "delay4",
+        "to_pin": "In"
+      },
+      {
+        "from_vertex": "delay",
+        "from_pin": "Out",
+        "to_vertex": "delay5",
+        "to_pin": "In"
+      },
+      {
+        "from_vertex": "delay2",
+        "from_pin": "Out",
+        "to_vertex": "delay5",
+        "to_pin": "In"
+      },
+      {
+        "from_vertex": "delay3",
+        "from_pin": "Out",
+        "to_vertex": "delay5",
+        "to_pin": "In"
+      },
+      {
+        "from_vertex": "delay4",
+        "from_pin": "Out",
+        "to_vertex": "delay5",
+        "to_pin": "In"
+      },
+      {
+        "from_vertex": "delay5",
+        "from_pin": "Out",
+        "to_vertex": "delay6",
+        "to_pin": "In"
+      },
+      {
+        "from_vertex": "delay6",
+        "from_pin": "Out",
+        "to_vertex": "delay7",
+        "to_pin": "In"
+      },
+      {
+        "from_vertex": "delay7",
+        "from_pin": "Out",
+        "to_vertex": "delay8",
+        "to_pin": "In"
+      },
+      {
+        "from_vertex": "uservalue_f0_1",
+        "from_pin": "Out",
+        "to_vertex": "delay",
+        "to_pin": "Feedback"
+      },
+      {
+        "from_vertex": "uservalue_f0_1",
+        "from_pin": "Out",
+        "to_vertex": "delay2",
+        "to_pin": "Feedback"
+      },
+      {
+        "from_vertex": "uservalue_f0_1",
+        "from_pin": "Out",
+        "to_vertex": "delay3",
+        "to_pin": "Feedback"
+      },
+      {
+        "from_vertex": "uservalue_f0_1",
+        "from_pin": "Out",
+        "to_vertex": "delay4",
+        "to_pin": "Feedback"
+      },
+      {
+        "from_vertex": "uservalue_f0_12",
+        "from_pin": "Out",
+        "to_vertex": "delay5",
+        "to_pin": "Feedback"
+      },
+      {
+        "from_vertex": "uservalue_f0_12",
+        "from_pin": "Out",
+        "to_vertex": "delay6",
+        "to_pin": "WetGain"
+      },
+      {
+        "from_vertex": "uservalue_f0_12",
+        "from_pin": "Out",
+        "to_vertex": "delay6",
+        "to_pin": "Feedback"
+      },
+      {
+        "from_vertex": "uservalue_f0_12",
+        "from_pin": "Out",
+        "to_vertex": "delay7",
+        "to_pin": "Feedback"
+      },
+      {
+        "from_vertex": "uservalue_f0_12",
+        "from_pin": "Out",
+        "to_vertex": "delay8",
+        "to_pin": "Feedback"
+      },
+      {
+        "from_vertex": "delay8",
+        "from_pin": "Out",
+        "to_vertex": "gain2",
+        "to_pin": "In"
+      },
+      {
+        "from_vertex": "uservalue_hertz",
+        "from_pin": "Out",
+        "to_vertex": "delay",
+        "to_pin": "Cutoff"
+      },
+      {
+        "from_vertex": "uservalue_hertz",
+        "from_pin": "Out",
+        "to_vertex": "delay2",
+        "to_pin": "Cutoff"
+      },
+      {
+        "from_vertex": "uservalue_hertz",
+        "from_pin": "Out",
+        "to_vertex": "delay3",
+        "to_pin": "Cutoff"
+      },
+      {
+        "from_vertex": "uservalue_hertz",
+        "from_pin": "Out",
+        "to_vertex": "delay4",
+        "to_pin": "Cutoff"
+      }
+    ],
+    "pins": [
+      {
+        "name": "Out",
+        "vertex": "gain2",
+        "pin": "Out"
+      },
+      {
+        "name": "CombFeedback",
+        "vertex": "uservalue_f0_1",
+        "pin": "In"
+      },
+      {
+        "name": "AllFeedback",
+        "vertex": "uservalue_f0_12",
+        "pin": "In"
+      },
+      {
+        "name": "In",
+        "vertex": "gain",
+        "pin": "In"
+      }
+    ]
+  },
+  "subgraphs": [
+    {
+      "vertices": [
+        {
+          "name": "svf",
+          "factory": "svf",
+          "subgraph": null,
+          "values": {},
+          "x": 0,
+          "y": -0.00521739130434784
+        }
+      ],
+      "edges": [
+        {
+          "from_vertex": "PARENT",
+          "from_pin": "SubOut",
+          "to_vertex": "svf",
+          "to_pin": "In"
+        },
+        {
+          "from_vertex": "svf",
+          "from_pin": "Out",
+          "to_vertex": "PARENT",
+          "to_pin": "SubIn"
+        }
+      ],
+      "pins": [
+        {
+          "name": "Cutoff",
+          "vertex": "svf",
+          "pin": "Cutoff"
+        }
+      ],
+      "name": "subgraph0"
+    },
+    {
+      "vertices": [
+        {
+          "name": "svf",
+          "factory": "svf",
+          "subgraph": null,
+          "values": {},
+          "x": 0.0014641288433381305,
+          "y": 0.0017391304347826875
+        }
+      ],
+      "edges": [
+        {
+          "from_vertex": "PARENT",
+          "from_pin": "SubOut",
+          "to_vertex": "svf",
+          "to_pin": "In"
+        },
+        {
+          "from_vertex": "svf",
+          "from_pin": "Out",
+          "to_vertex": "PARENT",
+          "to_pin": "SubIn"
+        }
+      ],
+      "pins": [
+        {
+          "name": "Cutoff",
+          "vertex": "svf",
+          "pin": "Cutoff"
+        }
+      ],
+      "name": "subgraph1"
+    },
+    {
+      "vertices": [
+        {
+          "name": "svf",
+          "factory": "svf",
+          "subgraph": null,
+          "values": {},
+          "x": -0.005856515373352855,
+          "y": -0.00521739130434784
+        }
+      ],
+      "edges": [
+        {
+          "from_vertex": "PARENT",
+          "from_pin": "SubOut",
+          "to_vertex": "svf",
+          "to_pin": "In"
+        },
+        {
+          "from_vertex": "svf",
+          "from_pin": "Out",
+          "to_vertex": "PARENT",
+          "to_pin": "SubIn"
+        }
+      ],
+      "pins": [
+        {
+          "name": "Cutoff",
+          "vertex": "svf",
+          "pin": "Cutoff"
+        }
+      ],
+      "name": "subgraph2"
+    },
+    {
+      "vertices": [
+        {
+          "name": "svf",
+          "factory": "svf",
+          "subgraph": null,
+          "values": {},
+          "x": -0.007320644216691097,
+          "y": -0.11304347826086958
+        }
+      ],
+      "edges": [
+        {
+          "from_vertex": "PARENT",
+          "from_pin": "SubOut",
+          "to_vertex": "svf",
+          "to_pin": "In"
+        },
+        {
+          "from_vertex": "svf",
+          "from_pin": "Out",
+          "to_vertex": "PARENT",
+          "to_pin": "SubIn"
+        }
+      ],
+      "pins": [
+        {
+          "name": "Cutoff",
+          "vertex": "svf",
+          "pin": "Cutoff"
+        }
+      ],
+      "name": "subgraph3"
+    },
+    {
+      "vertices": [],
+      "edges": [
+        {
+          "from_vertex": "PARENT",
+          "from_pin": "SubOut",
+          "to_vertex": "PARENT",
+          "to_pin": "SubIn"
+        }
+      ],
+      "pins": [],
+      "name": "subgraph4"
+    },
+    {
+      "vertices": [],
+      "edges": [
+        {
+          "from_vertex": "PARENT",
+          "from_pin": "SubOut",
+          "to_vertex": "PARENT",
+          "to_pin": "SubIn"
+        }
+      ],
+      "pins": [],
+      "name": "subgraph5"
+    },
+    {
+      "vertices": [],
+      "edges": [
+        {
+          "from_vertex": "PARENT",
+          "from_pin": "SubOut",
+          "to_vertex": "PARENT",
+          "to_pin": "SubIn"
+        }
+      ],
+      "pins": [],
+      "name": "subgraph6"
+    },
+    {
+      "vertices": [],
+      "edges": [
+        {
+          "from_vertex": "PARENT",
+          "from_pin": "SubOut",
+          "to_vertex": "PARENT",
+          "to_pin": "SubIn"
+        }
+      ],
+      "pins": [],
+      "name": "subgraph7"
+    }
+  ]
+}

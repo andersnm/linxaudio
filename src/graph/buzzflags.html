@@ -1,0 +1,110 @@
+<h1>Buzz Machine Developer IO Guide</h1>
+<ul>
+	<li>CMachineInterface::Work()
+	<li>CMachineInterface::WorkMonoToStereo()
+	<li>CMachineInterfaceEx::MultiWork()
+</ul>
+<table border="1">
+
+	<tr>
+		<th>
+			&nbsp;
+		</th>
+		<th>
+			0 Output
+		</th>
+		<th>
+			1 Output
+		</th>
+		<th>
+			2 Outputs
+		</th>
+		<th>
+			2+ Outputs
+		</th>
+	</tr>
+	<tr>
+		<th>
+			0 Input
+		</th>
+		<td>
+			GENERATOR | NO_OUTPUT<br />
+			Work()
+		</td>
+		<td>
+			GENERATOR<br />
+			Work()
+		</td>
+		<td>
+			GENERATOR | MONO_TO_STEREO<br />
+			WorkMonoToStereo()
+		</td>
+		<td>
+			GENERATOR | MULTI_IO<br />
+			MultiWork()
+		</td>
+	</tr>
+	<tr>
+		<th>
+			1 Input
+		</th>
+		<td>
+			EFFECT | NO_OUTPUT<br />
+			Work()
+		</td>
+		<td>
+			EFFECT<br />
+			Work()
+		</td>
+		<td>
+			EFFECT | MONO_TO_STEREO<br />
+			WorkMonoToStereo()
+		</td>
+		<td>
+			EFFECT | MULTI_IO<br />
+			MultiWork()
+		</td>
+	</tr>
+	<tr>
+		<th>
+			2 Inputs
+		</th>
+		<td>
+			EFFECT | STEREO_EFFECT | NO_OUTPUT<br />
+			Work()
+		</td>
+		<td>
+			EFFECT | MULTI_IO<br />
+			MultiWork()
+		</td>
+		<td>
+			EFFECT | STEREO_EFFECT<br />
+			Work()
+		</td>
+		<td>
+			EFFECT | MULTI_IO<br />
+			MultiWork()
+		</td>
+	</tr>
+	<tr>
+		<th>
+			2+ Inputs
+		</th>
+		<td>
+			EFFECT | MULTI_IO<br />
+			MultiWork()
+		</td>
+		<td>
+			EFFECT | MULTI_IO<br />
+			MultiWork()
+		</td>
+		<td>
+			EFFECT | MULTI_IO<br />
+			MultiWork()
+		</td>
+		<td>
+			EFFECT | MULTI_IO<br />
+			MultiWork()
+		</td>
+	</tr>
+</table>

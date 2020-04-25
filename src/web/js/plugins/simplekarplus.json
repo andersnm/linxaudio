@@ -1,0 +1,548 @@
+{
+  "system": {
+    "uniqueId": "NOID",
+    "product": "SimpleKarplus",
+    "author": "",
+    "myjsonId": ""
+  },
+  "factories": [
+    {
+      "name": "svf",
+      "symbol": "svf_factory",
+      "file": "svf.obj",
+      "deps": []
+    },
+    {
+      "name": "delay",
+      "symbol": "delay_factory",
+      "file": "delay.obj",
+      "deps": []
+    },
+    {
+      "name": "oscbuffer",
+      "symbol": "oscbuffer_factory",
+      "file": "oscbuffer.obj",
+      "deps": [
+        "inertia.obj"
+      ]
+    },
+    {
+      "name": "midinote",
+      "symbol": "midinotesplit_factory",
+      "file": "midinotesplit.obj",
+      "deps": []
+    },
+    {
+      "name": "notefrequency",
+      "symbol": "notefrequency_factory",
+      "file": "notefrequency.obj",
+      "deps": []
+    },
+    {
+      "name": "adsrvalue",
+      "symbol": "adsrvalue_factory",
+      "file": "adsrvalue.obj",
+      "deps": []
+    },
+    {
+      "name": "arithmeticvalue",
+      "symbol": "arithmeticvalue_factory",
+      "file": "arithmeticvalue.obj",
+      "deps": []
+    },
+    {
+      "name": "gain",
+      "symbol": "gain_factory",
+      "file": "gain.obj",
+      "deps": [
+        "inertia.obj"
+      ]
+    }
+  ],
+  "targets": [
+    {
+      "name": "plain-win32",
+      "arch": "i386",
+      "postfix": ".dll",
+      "deps": [
+        "math_x86.obj",
+        "graph.obj",
+        "ftol2.obj",
+        "chkstk.obj",
+        "memcpy.obj",
+        "memset.obj"
+      ],
+      "exports": [
+        "linx_host_get_graph"
+      ],
+      "paths": [
+        "lib/cl-x86"
+      ]
+    },
+    {
+      "name": "vst-win32",
+      "arch": "i386",
+      "postfix": "VST.dll",
+      "deps": [
+        "vsthost.obj",
+        "commonhost.obj",
+        "math_x86.obj",
+        "graph.obj",
+        "ftol2.obj",
+        "chkstk.obj",
+        "memcpy.obj",
+        "memset.obj"
+      ],
+      "exports": [
+        "VSTPluginMain",
+        "linx_host_get_graph"
+      ],
+      "paths": [
+        "lib/cl-x86"
+      ]
+    },
+    {
+      "name": "vst-win64",
+      "arch": "x64",
+      "postfix": "VST64.dll",
+      "deps": [
+        "vsthost.obj",
+        "commonhost.obj",
+        "math_sse.obj",
+        "fminfmax.obj",
+        "graph.obj",
+        "chkstk.obj",
+        "memcpy.obj",
+        "memset.obj"
+      ],
+      "exports": [
+        "VSTPluginMain",
+        "linx_host_get_graph"
+      ],
+      "paths": [
+        "lib/cl-x64"
+      ]
+    },
+    {
+      "name": "buzz-win32",
+      "arch": "i386",
+      "postfix": "Buzz.dll",
+      "deps": [
+        "buzzhost.obj",
+        "commonhost.obj",
+        "math_x86.obj",
+        "graph.obj",
+        "ftol2.obj",
+        "chkstk.obj",
+        "memcpy.obj",
+        "memset.obj",
+        "thiscall.obj",
+        "mman.obj"
+      ],
+      "exports": [
+        "GetInfo",
+        "CreateMachine",
+        "linx_host_get_graph"
+      ],
+      "paths": [
+        "lib/cl-x86"
+      ]
+    }
+  ],
+  "graph": {
+    "vertices": [
+      {
+        "name": "delay",
+        "factory": "delay",
+        "subgraph": "subgraph0",
+        "values": {
+          "Feedback": 0.89,
+          "WetGain": 1
+        },
+        "x": 0.18008784773060016,
+        "y": 0.318743493089212
+      },
+      {
+        "name": "oscbuffer",
+        "factory": "oscbuffer",
+        "subgraph": null,
+        "values": {
+          "Amp": 0,
+          "Waveform": 5
+        },
+        "x": 0.21083455344070257,
+        "y": -0.24394184168012933
+      },
+      {
+        "name": "midinote",
+        "factory": "midinote",
+        "subgraph": null,
+        "values": {},
+        "x": -0.36017569546120065,
+        "y": -0.6316639741518578
+      },
+      {
+        "name": "notefrequency",
+        "factory": "notefrequency",
+        "subgraph": null,
+        "values": {},
+        "x": -0.2650073206442167,
+        "y": -0.1405492730210015
+      },
+      {
+        "name": "adsrvalue",
+        "factory": "adsrvalue",
+        "subgraph": null,
+        "values": {
+          "Sustain": 0,
+          "Release": 0,
+          "Attack": 0
+        },
+        "x": -0.013177159590043952,
+        "y": -0.4991922455573504
+      },
+      {
+        "name": "freq2sec",
+        "factory": "arithmeticvalue",
+        "subgraph": null,
+        "values": {
+          "Lhs": 1,
+          "Rhs": 1,
+          "Type": 3
+        },
+        "x": -0.27672035139092244,
+        "y": 0.18222222222222206
+      },
+      {
+        "name": "sec2ms",
+        "factory": "arithmeticvalue",
+        "subgraph": null,
+        "values": {
+          "Rhs": 1000,
+          "Type": 2
+        },
+        "x": -0.0717423133235725,
+        "y": 0.40888888888888886
+      },
+      {
+        "name": "gain",
+        "factory": "gain",
+        "subgraph": null,
+        "values": {},
+        "x": 0.17130307467057104,
+        "y": 0.5126050420168067
+      }
+    ],
+    "edges": [
+      {
+        "from_vertex": "midinote",
+        "from_pin": "OutNote",
+        "to_vertex": "notefrequency",
+        "to_pin": "In"
+      },
+      {
+        "from_vertex": "midinote",
+        "from_pin": "OutTrigger",
+        "to_vertex": "adsrvalue",
+        "to_pin": "Trigger"
+      },
+      {
+        "from_vertex": "adsrvalue",
+        "from_pin": "Out",
+        "to_vertex": "oscbuffer",
+        "to_pin": "Amp"
+      },
+      {
+        "from_vertex": "sec2ms",
+        "from_pin": "Out",
+        "to_vertex": "adsrvalue",
+        "to_pin": "Decay"
+      },
+      {
+        "from_vertex": "oscbuffer",
+        "from_pin": "Out",
+        "to_vertex": "delay",
+        "to_pin": "In"
+      },
+      {
+        "from_vertex": "notefrequency",
+        "from_pin": "OutFreq",
+        "to_vertex": "freq2sec",
+        "to_pin": "Rhs"
+      },
+      {
+        "from_vertex": "freq2sec",
+        "from_pin": "Out",
+        "to_vertex": "sec2ms",
+        "to_pin": "Lhs"
+      },
+      {
+        "from_vertex": "sec2ms",
+        "from_pin": "Out",
+        "to_vertex": "delay",
+        "to_pin": "DelayMs"
+      },
+      {
+        "from_vertex": "delay",
+        "from_pin": "Out",
+        "to_vertex": "gain",
+        "to_pin": "In"
+      },
+      {
+        "from_vertex": "midinote",
+        "from_pin": "OutVelo",
+        "to_vertex": "gain",
+        "to_pin": "Amp"
+      }
+    ],
+    "pins": [
+      {
+        "name": "Midi",
+        "vertex": "midinote",
+        "pin": "MidiIn"
+      },
+      {
+        "name": "Out",
+        "vertex": "gain",
+        "pin": "Out"
+      },
+      {
+        "name": "Waveform",
+        "vertex": "oscbuffer",
+        "pin": "Waveform"
+      },
+      {
+        "name": "Feedback",
+        "vertex": "delay",
+        "pin": "Feedback"
+      },
+      {
+        "name": "Cutoff",
+        "vertex": "delay",
+        "pin": "Cutoff"
+      }
+    ]
+  },
+  "subgraphs": [
+    {
+      "vertices": [
+        {
+          "name": "svf",
+          "factory": "svf",
+          "subgraph": null,
+          "values": {},
+          "x": 0.002928257686676372,
+          "y": 0.026666666666666616
+        }
+      ],
+      "edges": [
+        {
+          "from_vertex": "PARENT",
+          "from_pin": "SubOut",
+          "to_vertex": "svf",
+          "to_pin": "In"
+        },
+        {
+          "from_vertex": "svf",
+          "from_pin": "Out",
+          "to_vertex": "PARENT",
+          "to_pin": "SubIn"
+        }
+      ],
+      "pins": [
+        {
+          "name": "Cutoff",
+          "vertex": "svf",
+          "pin": "Cutoff"
+        }
+      ],
+      "name": "subgraph0"
+    }
+  ],
+  "sequence": {
+    "bpm": 126,
+    "tpb": 4,
+    "length": 4096,
+    "tracks": [
+      {
+        "vertex": "midinote",
+        "events": [],
+        "patterns": [
+          {
+            "name": "00",
+            "rows": 64,
+            "columns": [
+              {
+                "name": "Midi",
+                "repeatIndex": 0,
+                "pinInfo": {
+                  "name": "MidiIn",
+                  "type": 4,
+                  "minValue": 0,
+                  "maxValue": 0,
+                  "defaultValue": 0,
+                  "precision": 0
+                },
+                "events": []
+              },
+              {
+                "name": "Midi",
+                "repeatIndex": 1,
+                "pinInfo": {
+                  "name": "MidiIn",
+                  "type": 4,
+                  "minValue": 0,
+                  "maxValue": 0,
+                  "defaultValue": 0,
+                  "precision": 0
+                },
+                "events": []
+              },
+              {
+                "name": "Midi",
+                "repeatIndex": 2,
+                "pinInfo": {
+                  "name": "MidiIn",
+                  "type": 4,
+                  "minValue": 0,
+                  "maxValue": 0,
+                  "defaultValue": 0,
+                  "precision": 0
+                },
+                "events": []
+              },
+              {
+                "name": "Midi",
+                "repeatIndex": 3,
+                "pinInfo": {
+                  "name": "MidiIn",
+                  "type": 4,
+                  "minValue": 0,
+                  "maxValue": 0,
+                  "defaultValue": 0,
+                  "precision": 0
+                },
+                "events": []
+              },
+              {
+                "name": "Midi",
+                "repeatIndex": 4,
+                "pinInfo": {
+                  "name": "MidiIn",
+                  "type": 4,
+                  "minValue": 0,
+                  "maxValue": 0,
+                  "defaultValue": 0,
+                  "precision": 0
+                },
+                "events": []
+              },
+              {
+                "name": "Midi",
+                "repeatIndex": 5,
+                "pinInfo": {
+                  "name": "MidiIn",
+                  "type": 4,
+                  "minValue": 0,
+                  "maxValue": 0,
+                  "defaultValue": 0,
+                  "precision": 0
+                },
+                "events": []
+              },
+              {
+                "name": "Midi",
+                "repeatIndex": 6,
+                "pinInfo": {
+                  "name": "MidiIn",
+                  "type": 4,
+                  "minValue": 0,
+                  "maxValue": 0,
+                  "defaultValue": 0,
+                  "precision": 0
+                },
+                "events": []
+              },
+              {
+                "name": "Midi",
+                "repeatIndex": 7,
+                "pinInfo": {
+                  "name": "MidiIn",
+                  "type": 4,
+                  "minValue": 0,
+                  "maxValue": 0,
+                  "defaultValue": 0,
+                  "precision": 0
+                },
+                "events": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vertex": "oscbuffer",
+        "events": [],
+        "patterns": [
+          {
+            "name": "00",
+            "rows": 64,
+            "columns": [
+              {
+                "name": "Waveform",
+                "repeatIndex": 0,
+                "pinInfo": {
+                  "name": "Waveform",
+                  "type": 2,
+                  "minValue": 0,
+                  "maxValue": 6,
+                  "defaultValue": 0,
+                  "precision": 0
+                },
+                "events": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vertex": "delay",
+        "events": [],
+        "patterns": [
+          {
+            "name": "00",
+            "rows": 64,
+            "columns": [
+              {
+                "name": "Feedback",
+                "repeatIndex": 0,
+                "pinInfo": {
+                  "name": "Feedback",
+                  "type": 0,
+                  "minValue": 0,
+                  "maxValue": 2,
+                  "defaultValue": 0.6,
+                  "precision": 0.01
+                },
+                "events": []
+              },
+              {
+                "name": "Cutoff",
+                "repeatIndex": 0,
+                "pinInfo": {
+                  "name": "Cutoff",
+                  "type": 0,
+                  "minValue": 10,
+                  "maxValue": 20000,
+                  "defaultValue": 10000,
+                  "precision": 1
+                },
+                "events": []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

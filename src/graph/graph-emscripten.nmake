@@ -1,0 +1,48 @@
+# NMakefile for compiling the linxaudio modules and graph to js.
+# Expects both nmake and Emscripten on the path. The vcxproj build action
+# calls C:\Program Files\Emscripten\emsdk.bat before nmake.
+
+OBJPATH = ..\..\lib\emscripten
+OBJEXT = bc
+CFLAGS = -c -O3 -Icrt/include -s MAIN_MODULE=1
+LINKFLAGS = -O3 -s LINKABLE=1 -s EXPORT_ALL=1 -s PRECISE_F32=1 -s NO_FILESYSTEM=1 -s ASM_JS=1 --memory-init-file 0 
+
+MODULE_TARGETS = \
+	$(OBJPATH)\adsrvalue.$(OBJEXT) \
+	$(OBJPATH)\arithmeticvalue.$(OBJEXT) \
+	$(OBJPATH)\clip.$(OBJEXT) \
+	$(OBJPATH)\oscbuffer.$(OBJEXT) \
+	$(OBJPATH)\container.$(OBJEXT) \
+	$(OBJPATH)\polycontainer.$(OBJEXT) \
+	$(OBJPATH)\stereocontainer.$(OBJEXT) \
+	$(OBJPATH)\delay.$(OBJEXT) \
+	$(OBJPATH)\distortion.$(OBJEXT) \
+	$(OBJPATH)\envscale.$(OBJEXT) \
+	$(OBJPATH)\gain.$(OBJEXT) \
+	$(OBJPATH)\inertia.$(OBJEXT) \
+	$(OBJPATH)\lfovalue.$(OBJEXT) \
+	$(OBJPATH)\midinotesplit.$(OBJEXT) \
+	$(OBJPATH)\notefrequency.$(OBJEXT) \
+	$(OBJPATH)\svf.$(OBJEXT) \
+	$(OBJPATH)\uservalue.$(OBJEXT) \
+	$(OBJPATH)\biquad.$(OBJEXT) \
+	$(OBJPATH)\kickxp.$(OBJEXT)
+#	$(OBJPATH)\phatman.$(OBJEXT)
+
+GRAPH_TARGETS = \
+	$(OBJPATH)\graph.$(OBJEXT) \
+	$(OBJPATH)\designer.$(OBJEXT)
+
+all: $(GRAPH_TARGETS) $(MODULE_TARGETS) $(OBJPATH)\linx.js
+
+clean:
+	del $(GRAPH_TARGETS) $(MODULE_TARGETS) $(OBJPATH)\linx.js
+
+$(GRAPH_TARGETS) $(MODULE_TARGETS): $(@B).c
+	@echo Building $@ from $(@B).c
+	@if not exist $(OBJPATH) mkdir $(OBJPATH)
+	emcc $(CFLAGS) $(@B).c -o $@
+
+$(OBJPATH)\linx.js: $(GRAPH_TARGETS) $(MODULE_TARGETS)
+	call emcc $(GRAPH_TARGETS) $(MODULE_TARGETS) $(LINKFLAGS) -o $(OBJPATH)\linx.js
+	copy $(OBJPATH)\linx.js ..\web\js\linx.js /y

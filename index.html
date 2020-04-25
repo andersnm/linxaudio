@@ -1,0 +1,296 @@
+<h1>linxaudio</h1>
+<p>
+System for generating VST and Buzz audio plugins from DSP graph descriptions
+in JSON format and precompiled modules without a compiler or full development
+environment.
+</p>
+
+<p>
+	Download: <a href="linxaudio-0.0.1.zip">linxaudio-0.0.1.zip</a> (Windows binaries)
+</p>
+<p>
+NOTE: Supports using 32 bit x86 object files (COFF) created by Visual C/C++,
+and generates Windows PE executables. The long term plan includes supporting
+other architectures such as x64 and ARM, other compilers such as gcc and clang,
+and other operating systems such as Linux and Mac.
+</p>
+
+<p>
+	Subversion source code repository: svn://anders-e.com/linxaudio/trunk/linxaudio
+</p>
+
+<h1>linx modules</h1>
+<p>
+A module is a basic unit of operation, f.ex a filter or an oscillator, and
+exposes its capabilities through input and output pins. 
+</p>
+<p>
+Modules can be connected and chained in the DSP graph, forming edges between
+modules' output and input pins.
+</p>
+<p>
+A module pin is defined by its direction - either output or input - and a
+datatype. Output pins can be connected to compatible input pins. The possible
+datatypes are:
+</p>
+<ul>
+	<li>float
+	<li>integer
+	<li>float buffer
+	<li>midi
+</ul>
+<p>
+Some kinds of modules support subgraph processing, in which modules can defer
+parts of its processing to a separate user-defined subgraph. Until more
+documentation becomes available, please refer f.ex to the delay.json example.
+</p>
+<p>
+	Example module source code: <a href="gain.c.txt">gain.c</a><br />
+</p>
+
+<h1>linxgen</h1>
+<p>
+linxgen.exe is a tool to compile JSON and link object files into a shared
+library executable (DLL) usable by your preferred DAW host.
+</p>
+<p>
+Directory structure:
+</p>
+<ul>
+		<li>linxgen.exe
+		<li>sample.json
+		<li>delay.json
+		<li>lib/*.obj
+</ul>
+<p>
+	Example JSON: <a href="delay.json.txt">delay.json</a><br />
+</p>
+<p>
+Usage to create delayVST.dll plugin for VST hosts:
+</p>
+<pre>
+	linxgen delay.json vst-win32
+</pre>
+<p>
+Usage to create delayBuzz.dll plugin for Buzz (or Buze):
+</p>
+<pre>
+	linxgen delay.json buzz-win32
+</pre>
+
+<h1>Licensing and notes on commercial use</h1>
+<p>
+linxgen.exe is made from code primarily licenced under the LGPL. This license
+applies only to the graph compiler and linker, and *not* the executable output
+files created by the tool.
+</p>
+<p>
+However, most of the standard modules included with linxgen are released under
+the LGPL as well, so any executables using standard modules will still fall
+under the LGPL!
+</p>
+<p>
+The core graph code and host interface implementations are licenced under the 
+BSD-license. This permits advanced users to create and redistribute plugins
+under any license, provided *none* of the LGPL standard libraries and modules
+are used.
+</p>
+<p>
+Be aware that JSON graph description files also automatically fall under the
+LGPL when using the standard libraries and modules. The LGPL does not permit
+distribution of executable binaries unless all the source code is also made
+available. The JSON is a vital part of the plugin source code.
+</p>
+<p>
+The idea is to keep the development of the core tools and libraries open, but
+still allow private and commercial use by advanced users.
+</p>
+
+<h1>Dependencies and credits</h1>
+<p>
+PE Bliss (c) DX 2011-2012, kaimi.ru<br />
+Library is free to use in both commertial and non-commertial projects.<br />
+https://code.google.com/p/portable-executable-library/
+</p>
+
+<p>
+Libelf Copyright (C) 1995 - 2009 Michael Riepe<br />
+Libelf is released under the terms of the GNU Library General Public License.<br />
+http://www.mr511.de/software/english.html
+</p>
+
+<h1>Future and TODO</h1>
+<ul>
+	<li>Documentation
+	<li>More standard modules
+	<li>More json samples
+	<li>Subgraph chunking of propagated pins
+	<li>Linker should remove unused object file sections
+	<li>Make linxgen a C library for generating plugins in script at runtime
+	<li>Advanced linker merging features for import tables
+	<li>Project files for autoconf/automake
+	<li>More compiler and OS support:
+	  <ul>
+		<li>ELF object file parsing
+		<li>ELF executable writing
+		<li>x86 LV2, gstreamer targets on Linux
+		<li>Mach object file parsing
+		<li>Mach executable writing
+		<li>x86 VST target on mac
+		<li>ELF .a file parsing
+		<li>COFF .lib file parsing
+	  </ul>
+	<li>x64 architecture, 64 bit Buzz and VST targets
+</ul>
+
+
+<h1>Standard modules</h1>
+<p>
+	So far the following modules are included:
+</p>
+<table border="1">
+	<tr>
+		<th>
+			Source file
+		</th>
+		<th>
+			Type
+		</th>
+		<th>
+			Detail
+		</th>
+	</tr>
+	<tr>
+		<td>
+			arithmeticvalue.c
+		</td>
+		<td>
+			Envelope effect
+		</td>
+		<td>
+			Envelope arithmetics
+		</td>
+	</tr>
+	<tr>
+		<td>
+			adsrvalue.c
+		</td>
+		<td>
+			Envelope generator
+		</td>
+		<td>
+			Attack, decay, sustain, release envelope
+		</td>
+	</tr>
+	<tr>
+		<td>
+			biquad_eq.c
+		</td>
+		<td>
+			Effect
+		</td>
+		<td>
+			Biquad equalizer
+		</td>
+	</tr>
+	<tr>
+		<td>
+			biquad_filter.c<br />
+		</td>
+		<td>
+			Effect
+		</td>
+		<td>
+			Biquad / 2-pole 2-zero filter
+		</td>
+	</tr>
+	<tr>
+		<td>
+			biquad_trifilter.c
+		</td>
+		<td>
+			Effect
+		</td>
+		<td>
+			Filters from FSM Infector
+		</td>
+	</tr>
+	<tr>
+		<td>
+			delay.c
+		</td>
+		<td>
+			Effect
+		</td>
+		<td>
+			Delay with sub channel processing
+		</td>
+	</tr>
+	<tr>
+		<td>
+			gain.c
+		</td>
+		<td>
+			Effect
+		</td>
+		<td>
+			Gain / amplifier
+		</td>
+	</tr>
+	<tr>
+		<td>
+			lfovalue.c
+		</td>
+		<td>
+			Envelope generator
+		</td>
+		<td>
+			Low frequency oscillator envelope
+		</td>
+	</tr>
+	<tr>
+		<td>
+			midinotesplit.c
+		</td>
+		<td>
+			Envelope generator
+		</td>
+		<td>
+			Converts MIDI notes to frequency, velocity and trigger envelopes
+		</td>
+	</tr>
+	<tr>
+		<td>
+			oscbuffer.c
+		</td>
+		<td>
+			Generator
+		</td>
+		<td>
+			Oscillator
+		</td>
+	</tr>
+	<tr>
+		<td>
+			svf.c
+		</td>
+		<td>
+			Effect
+		</td>
+		<td>
+			State variable filter
+		</td>
+	</tr>
+	<tr>
+		<td>
+			transformvalue.c
+		</td>
+		<td>
+			Envelope effect
+		</td>
+		<td>
+			Envelope translation and scaling
+		</td>
+	</tr>
+	
+</table>

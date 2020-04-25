@@ -1,0 +1,159 @@
+<h2>Value modules - Control other modules</h2>
+
+<table>
+
+	<tr>
+		<td>
+			adsrvalue
+		</td>
+		<td>
+			Generates values for an ADSR envelope in the range 0..1. Values are emitted every 16 samples
+		</td>
+	</tr>
+
+	<tr>
+		<td>
+			arithmeticvalue
+		</td>
+		<td>
+			Performs arithmetic operations on two values to produce a single value. Add, subtract, multiply, divide, modulus
+		</td>
+	</tr>
+
+	<tr>
+		<td>
+			envscale
+		</td>
+		<td>
+			Scale a value from a range to another
+		</td>
+	</tr>
+
+	<tr>
+		<td>
+			lfovalue
+		</td>
+		<td>
+			Generate low frequency values
+		</td>
+	</tr>
+
+	<tr>
+		<td>
+			midinotesplit
+		</td>
+		<td>
+			Generate trigger, velocity and note values from midi note input
+		</td>
+	</tr>
+
+	<tr>
+		<td>
+			note frequency
+		</td>
+		<td>
+			Convert note value to frequency
+		</td>
+	</tr>
+	
+	<tr>
+		<td>
+			uservalue_*
+		</td>
+		<td>
+			Various simple value emitters for controlling several pins with a single (user controlled) pin
+		</td>
+	</tr>
+</table>
+
+<h2>Audio modules - Basic, Mono</h2>
+<table>
+
+	<tr>
+		<td>
+			biquad_filter
+		</td>
+		<td>
+			Biquad filter
+		</td>
+	</tr>
+	<tr>
+		<td>
+			biquad_eq
+		</td>
+		<td>
+			Biquad equaliser
+		</td>
+	</tr>
+	<tr>
+		<td>
+			biquad_trifilter
+		</td>
+		<td>
+			Filters from FSM infector
+		</td>
+	</tr>
+
+	<tr>
+		<td>
+			clip
+		</td>
+		<td>
+			Audio clipping w/pre and post amp
+		</td>
+	</tr>
+
+	<tr>
+		<td>
+			delay
+		</td>
+		<td>
+			Requires subgraph
+		</td>
+	</tr>
+
+	<tr>
+		<td>
+			distortion
+		</td>
+		<td>
+			Audio distortion
+		</td>
+	</tr>
+
+	<tr>
+		<td>
+			gain
+		</td>
+		<td>
+			Audio gain
+		</td>
+	</tr>
+
+	<tr>
+		<td>
+			oscbuffer
+		</td>
+		<td>
+			Oscillator. Generates sine, square, saw, inv saw, triangle, gaussian noise audio buffers
+		</td>
+	</tr>
+
+	<tr>
+		<td>
+			polycontainer
+		</td>
+		<td>
+			Requires subgraph. Adds polyphonic support to the subgraph contents. Clones the subgraph for each voice up to 8 simultaneous voices
+		</td>
+	</tr>
+
+	<tr>
+		<td>
+			svf
+		</td>
+		<td>
+			State variable filter
+		</td>
+	</tr>
+</table>

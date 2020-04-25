@@ -1,0 +1,23 @@
+# Nmake include file to set CRT targets for another Nmake project
+
+CRT_STRING_TARGETS = \
+	$(OBJPATH)\memcpy.obj \
+	$(OBJPATH)\memset.obj
+
+CRT_SYS_TARGETS = \
+	$(OBJPATH)\mman.obj \
+
+# NOTE: the math functions are compiled to a single pseudo-library .obj per 
+# architecture from a single source file, e.g math_x64.c or math_x86.c, which
+# includes all other required .c-files. the source files are listed as
+# dependencies to trigger rebuilds, but are not built directly by nmake.
+
+CRT_MATH_X64_TARGET = $(OBJPATH)\math_x64.obj
+CRT_MATH_X86_TARGET = $(OBJPATH)\math_x86.obj
+CRT_MATH_X86_SSE2_TARGET = $(OBJPATH)\math_x86_sse2.obj
+
+# Export targets for supported architectures
+
+CRT_X64_TARGETS = $(CRT_STRING_TARGETS) $(CRT_MATH_X64_TARGET)
+CRT_X86_SSE2_TARGETS = $(CRT_STRING_TARGETS) $(CRT_SYS_TARGETS) $(CRT_MATH_X86_SSE2_TARGET)
+CRT_X86_TARGETS = $(CRT_STRING_TARGETS) $(CRT_SYS_TARGETS) $(CRT_MATH_X86_TARGET)

@@ -1,0 +1,638 @@
+{
+  "system": {
+    "uniqueId": "NOID",
+    "product": "SimpleKick",
+    "author": "andy"
+  },
+  "factories": [
+    {
+      "name": "oscbuffer",
+      "symbol": "oscbuffer_factory",
+      "file": "oscbuffer.obj",
+      "deps": [
+        "inertia.obj"
+      ]
+    },
+    {
+      "name": "adsrvalue",
+      "symbol": "adsrvalue_factory",
+      "file": "adsrvalue.obj",
+      "deps": []
+    },
+    {
+      "name": "notefrequency",
+      "symbol": "notefrequency_factory",
+      "file": "notefrequency.obj",
+      "deps": []
+    },
+    {
+      "name": "midinote",
+      "symbol": "midinotesplit_factory",
+      "file": "midinotesplit.obj",
+      "deps": []
+    },
+    {
+      "name": "uservalue_u7",
+      "symbol": "uservalue_u7_factory",
+      "file": "uservalue.obj",
+      "deps": []
+    },
+    {
+      "name": "envscale",
+      "symbol": "envscale_factory",
+      "file": "envscale.obj",
+      "deps": []
+    },
+    {
+      "name": "arithmeticvalue",
+      "symbol": "arithmeticvalue_factory",
+      "file": "arithmeticvalue.obj",
+      "deps": []
+    },
+    {
+      "name": "gain",
+      "symbol": "gain_factory",
+      "file": "gain.obj",
+      "deps": [
+        "inertia.obj"
+      ]
+    }
+  ],
+  "targets": [
+    {
+      "name": "plain-win32",
+      "arch": "i386",
+      "postfix": ".dll",
+      "deps": [
+        "math_x86.obj",
+        "graph.obj",
+        "ftol2.obj",
+        "chkstk.obj",
+        "memcpy.obj",
+        "memset.obj"
+      ],
+      "exports": [
+        "linx_host_get_graph"
+      ],
+      "paths": [
+        "lib/cl-x86"
+      ]
+    },
+    {
+      "name": "vst-win32",
+      "arch": "i386",
+      "postfix": "VST.dll",
+      "deps": [
+        "vsthost.obj",
+        "commonhost.obj",
+        "math_x86.obj",
+        "graph.obj",
+        "ftol2.obj",
+        "chkstk.obj",
+        "memcpy.obj",
+        "memset.obj"
+      ],
+      "exports": [
+        "VSTPluginMain",
+        "linx_host_get_graph"
+      ],
+      "paths": [
+        "lib/cl-x86"
+      ]
+    },
+    {
+      "name": "vst-win64",
+      "arch": "x64",
+      "postfix": "VST64.dll",
+      "deps": [
+        "vsthost.obj",
+        "commonhost.obj",
+        "math_sse.obj",
+        "fminfmax.obj",
+        "graph.obj",
+        "chkstk.obj",
+        "memcpy.obj",
+        "memset.obj"
+      ],
+      "exports": [
+        "VSTPluginMain",
+        "linx_host_get_graph"
+      ],
+      "paths": [
+        "lib/cl-x64"
+      ]
+    },
+    {
+      "name": "buzz-win32",
+      "arch": "i386",
+      "postfix": "Buzz.dll",
+      "deps": [
+        "buzzhost.obj",
+        "commonhost.obj",
+        "math_x86.obj",
+        "graph.obj",
+        "ftol2.obj",
+        "chkstk.obj",
+        "memcpy.obj",
+        "memset.obj",
+        "thiscall.obj",
+        "mman.obj"
+      ],
+      "exports": [
+        "GetInfo",
+        "CreateMachine",
+        "linx_host_get_graph"
+      ],
+      "paths": [
+        "lib/cl-x86"
+      ]
+    }
+  ],
+  "graph": {
+    "vertices": [
+      {
+        "name": "oscbuffer",
+        "factory": "oscbuffer",
+        "subgraph": null,
+        "values": {
+          "Amp": 0,
+          "Waveform": 0
+        },
+        "x": 0.008784773060029227,
+        "y": 0.41512605042016837
+      },
+      {
+        "name": "ampadsr",
+        "factory": "adsrvalue",
+        "subgraph": null,
+        "values": {
+          "Attack": 0,
+          "Decay": 526,
+          "Sustain": 0,
+          "Release": 0
+        },
+        "x": -0.32210834553440704,
+        "y": -0.20000000000000007
+      },
+      {
+        "name": "pitchadsr",
+        "factory": "adsrvalue",
+        "subgraph": null,
+        "values": {
+          "Release": 0,
+          "Sustain": 1,
+          "Attack": 442,
+          "Decay": 0
+        },
+        "x": 0.22547584187408487,
+        "y": -0.5367781155015198
+      },
+      {
+        "name": "notefrequency",
+        "factory": "notefrequency",
+        "subgraph": null,
+        "values": {},
+        "x": 0.2298682284040997,
+        "y": 0.29075630252100826
+      },
+      {
+        "name": "midinote",
+        "factory": "midinote",
+        "subgraph": null,
+        "values": {},
+        "x": 0.005856515373352744,
+        "y": -0.811764705882353
+      },
+      {
+        "name": "StartPitch",
+        "factory": "uservalue_u7",
+        "subgraph": null,
+        "values": {
+          "In": 97
+        },
+        "x": 0.3660322108345536,
+        "y": -0.8016806722689076
+      },
+      {
+        "name": "EndPitch",
+        "factory": "uservalue_u7",
+        "subgraph": null,
+        "values": {
+          "In": 4
+        },
+        "x": 0.7335285505124451,
+        "y": -0.7517611299839085
+      },
+      {
+        "name": "envscale",
+        "factory": "envscale",
+        "subgraph": null,
+        "values": {
+          "EnvMod": 1,
+          "InMin": 0,
+          "InMax": 1
+        },
+        "x": 0.506588579795022,
+        "y": -0.18741283747541582
+      },
+      {
+        "name": "noteadd",
+        "factory": "arithmeticvalue",
+        "subgraph": null,
+        "values": {},
+        "x": 0.17130307467057104,
+        "y": -0.2100840336134454
+      },
+      {
+        "name": "startscale",
+        "factory": "arithmeticvalue",
+        "subgraph": null,
+        "values": {
+          "Type": 2,
+          "Rhs": 0.25
+        },
+        "x": 0.43923865300146425,
+        "y": -0.5172413793103448
+      },
+      {
+        "name": "endscale",
+        "factory": "arithmeticvalue",
+        "subgraph": null,
+        "values": {
+          "Type": 2,
+          "Rhs": 0.25
+        },
+        "x": 0.7657393850658858,
+        "y": -0.4926108374384236
+      },
+      {
+        "name": "gain",
+        "factory": "gain",
+        "subgraph": null,
+        "values": {},
+        "x": -0.20204978038067356,
+        "y": 0.6873949579831931
+      }
+    ],
+    "edges": [
+      {
+        "from_vertex": "ampadsr",
+        "from_pin": "Out",
+        "to_vertex": "oscbuffer",
+        "to_pin": "Amp"
+      },
+      {
+        "from_vertex": "notefrequency",
+        "from_pin": "OutFreq",
+        "to_vertex": "oscbuffer",
+        "to_pin": "Frequency"
+      },
+      {
+        "from_vertex": "midinote",
+        "from_pin": "OutTrigger",
+        "to_vertex": "ampadsr",
+        "to_pin": "Trigger"
+      },
+      {
+        "from_vertex": "midinote",
+        "from_pin": "OutTrigger",
+        "to_vertex": "pitchadsr",
+        "to_pin": "Trigger"
+      },
+      {
+        "from_vertex": "pitchadsr",
+        "from_pin": "Out",
+        "to_vertex": "envscale",
+        "to_pin": "InValue"
+      },
+      {
+        "from_vertex": "midinote",
+        "from_pin": "OutNote",
+        "to_vertex": "noteadd",
+        "to_pin": "Lhs"
+      },
+      {
+        "from_vertex": "envscale",
+        "from_pin": "OutValue",
+        "to_vertex": "noteadd",
+        "to_pin": "Rhs"
+      },
+      {
+        "from_vertex": "noteadd",
+        "from_pin": "Out",
+        "to_vertex": "notefrequency",
+        "to_pin": "In"
+      },
+      {
+        "from_vertex": "StartPitch",
+        "from_pin": "Out",
+        "to_vertex": "startscale",
+        "to_pin": "Lhs"
+      },
+      {
+        "from_vertex": "startscale",
+        "from_pin": "Out",
+        "to_vertex": "envscale",
+        "to_pin": "OutMin"
+      },
+      {
+        "from_vertex": "EndPitch",
+        "from_pin": "Out",
+        "to_vertex": "endscale",
+        "to_pin": "Lhs"
+      },
+      {
+        "from_vertex": "endscale",
+        "from_pin": "Out",
+        "to_vertex": "envscale",
+        "to_pin": "OutMax"
+      },
+      {
+        "from_vertex": "oscbuffer",
+        "from_pin": "Out",
+        "to_vertex": "gain",
+        "to_pin": "In"
+      },
+      {
+        "from_vertex": "midinote",
+        "from_pin": "OutVelo",
+        "to_vertex": "gain",
+        "to_pin": "Amp"
+      }
+    ],
+    "pins": [
+      {
+        "name": "Out",
+        "vertex": "gain",
+        "pin": "Out"
+      },
+      {
+        "name": "MidiIn",
+        "vertex": "midinote",
+        "pin": "MidiIn"
+      },
+      {
+        "name": "StartPitch",
+        "vertex": "StartPitch",
+        "pin": "In"
+      },
+      {
+        "name": "EndPitch",
+        "vertex": "EndPitch",
+        "pin": "In"
+      },
+      {
+        "name": "Attack",
+        "vertex": "ampadsr",
+        "pin": "Attack"
+      },
+      {
+        "name": "Decay",
+        "vertex": "ampadsr",
+        "pin": "Decay"
+      },
+      {
+        "name": "Duration",
+        "vertex": "pitchadsr",
+        "pin": "Attack"
+      }
+    ]
+  },
+  "subgraphs": [],
+  "sequence": {
+    "bpm": 126,
+    "tpb": 4,
+    "length": 4096,
+    "tracks": [
+      {
+        "vertex": "midinote",
+        "events": [],
+        "patterns": [
+          {
+            "name": "00",
+            "rows": 64,
+            "columns": [
+              {
+                "name": "MidiIn",
+                "repeatIndex": 0,
+                "pinInfo": {
+                  "name": "MidiIn",
+                  "type": 4,
+                  "minValue": 0,
+                  "maxValue": 0,
+                  "defaultValue": 0,
+                  "precision": 0
+                },
+                "events": []
+              },
+              {
+                "name": "MidiIn",
+                "repeatIndex": 1,
+                "pinInfo": {
+                  "name": "MidiIn",
+                  "type": 4,
+                  "minValue": 0,
+                  "maxValue": 0,
+                  "defaultValue": 0,
+                  "precision": 0
+                },
+                "events": []
+              },
+              {
+                "name": "MidiIn",
+                "repeatIndex": 2,
+                "pinInfo": {
+                  "name": "MidiIn",
+                  "type": 4,
+                  "minValue": 0,
+                  "maxValue": 0,
+                  "defaultValue": 0,
+                  "precision": 0
+                },
+                "events": []
+              },
+              {
+                "name": "MidiIn",
+                "repeatIndex": 3,
+                "pinInfo": {
+                  "name": "MidiIn",
+                  "type": 4,
+                  "minValue": 0,
+                  "maxValue": 0,
+                  "defaultValue": 0,
+                  "precision": 0
+                },
+                "events": []
+              },
+              {
+                "name": "MidiIn",
+                "repeatIndex": 4,
+                "pinInfo": {
+                  "name": "MidiIn",
+                  "type": 4,
+                  "minValue": 0,
+                  "maxValue": 0,
+                  "defaultValue": 0,
+                  "precision": 0
+                },
+                "events": []
+              },
+              {
+                "name": "MidiIn",
+                "repeatIndex": 5,
+                "pinInfo": {
+                  "name": "MidiIn",
+                  "type": 4,
+                  "minValue": 0,
+                  "maxValue": 0,
+                  "defaultValue": 0,
+                  "precision": 0
+                },
+                "events": []
+              },
+              {
+                "name": "MidiIn",
+                "repeatIndex": 6,
+                "pinInfo": {
+                  "name": "MidiIn",
+                  "type": 4,
+                  "minValue": 0,
+                  "maxValue": 0,
+                  "defaultValue": 0,
+                  "precision": 0
+                },
+                "events": []
+              },
+              {
+                "name": "MidiIn",
+                "repeatIndex": 7,
+                "pinInfo": {
+                  "name": "MidiIn",
+                  "type": 4,
+                  "minValue": 0,
+                  "maxValue": 0,
+                  "defaultValue": 0,
+                  "precision": 0
+                },
+                "events": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vertex": "StartPitch",
+        "events": [],
+        "patterns": [
+          {
+            "name": "00",
+            "rows": 64,
+            "columns": [
+              {
+                "name": "StartPitch",
+                "repeatIndex": 0,
+                "pinInfo": {
+                  "name": "In",
+                  "type": 2,
+                  "minValue": 0,
+                  "maxValue": 127,
+                  "defaultValue": 0,
+                  "precision": 0
+                },
+                "events": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vertex": "EndPitch",
+        "events": [],
+        "patterns": [
+          {
+            "name": "00",
+            "rows": 64,
+            "columns": [
+              {
+                "name": "EndPitch",
+                "repeatIndex": 0,
+                "pinInfo": {
+                  "name": "In",
+                  "type": 2,
+                  "minValue": 0,
+                  "maxValue": 127,
+                  "defaultValue": 0,
+                  "precision": 0
+                },
+                "events": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vertex": "ampadsr",
+        "events": [],
+        "patterns": [
+          {
+            "name": "00",
+            "rows": 64,
+            "columns": [
+              {
+                "name": "Attack",
+                "repeatIndex": 0,
+                "pinInfo": {
+                  "name": "Attack",
+                  "type": 2,
+                  "minValue": 0,
+                  "maxValue": 1000,
+                  "defaultValue": 100,
+                  "precision": 0
+                },
+                "events": []
+              },
+              {
+                "name": "Decay",
+                "repeatIndex": 0,
+                "pinInfo": {
+                  "name": "Decay",
+                  "type": 2,
+                  "minValue": 0,
+                  "maxValue": 1000,
+                  "defaultValue": 100,
+                  "precision": 0
+                },
+                "events": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vertex": "pitchadsr",
+        "events": [],
+        "patterns": [
+          {
+            "name": "00",
+            "rows": 64,
+            "columns": [
+              {
+                "name": "Duration",
+                "repeatIndex": 0,
+                "pinInfo": {
+                  "name": "Attack",
+                  "type": 2,
+                  "minValue": 0,
+                  "maxValue": 1000,
+                  "defaultValue": 100,
+                  "precision": 0
+                },
+                "events": []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

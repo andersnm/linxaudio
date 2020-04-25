@@ -1,0 +1,198 @@
+<html>
+<meta http-equiv="Expires" content="0" />
+<style>
+body {
+	margin:auto; padding:0;
+	max-width:700px;
+	background-color:#DAD6C9;
+	font-family:helvetica;
+	font-size:12px;
+}
+
+bigbox {
+	display:block;
+/*	margin-left:25%;
+	margin-right:25%;*/
+	margin-top:10px;
+	padding:10px;
+	/*border:1px solid black;*/
+	background-color:white;
+}
+
+h1 {
+	color:#338833;
+	font-weight:normal;
+	font-size:60px;
+	margin:0;
+	padding:0;
+	font-family:monospace;
+}
+
+bigbox h1 {
+	/*font-size:unset;
+	font-family:unset;*/
+}
+
+bigbox a {
+	color:black;
+}
+
+bigbox poap {
+	margin:0;
+	padding:0;
+}
+</style>
+<body>
+<bigbox>
+	<object type="image/svg+xml" data="assets/1440263717_settings.svg" style="width:100px; height:100px; padding-right:10px; position:absolute"></object>
+	<div style="margin-left:110px; margin-right:40px">
+		<h1><a href="designer.html">Designer</a></h1>
+		<p>Online audio synth/effect DSP graph editor and tracker/sequencer.
+		The audio engine and DSP modules are compiled from C to asm.js for maximum performance and portability.
+		The projects can be compiled to VST DLLs for desktop DAWs using desktop tools.</p>
+		<p>
+			<a href="designer.html">Start</a> |
+			<a href="http://anders-e.com/code/browser/linxaudio/trunk/linxaudio">Browse source code</a> |
+			<a href="designer.html?myjson=wulg,3rvs0,4jmpy">Example of shared synths</a>
+		</p>
+	</div>
+</bigbox>
+
+<!--bigbox>
+	<object type="image/svg+xml" data="assets/1440263657_music.svg" style="width:100px; height:100px; padding-right:10px; position:absolute"></object>
+	<div style="margin-left:110px; margin-right:40px">
+		<h1><a href="composer.html">Composer</a></h1>
+		<p>Online modular audio tracker/sequencer using plugins created in Designer. 
+		<p>
+			<a href="composer.html">Start</a>
+		</p>
+	</div>
+</bigbox-->
+
+
+<!--bigbox>
+	<object type="image/svg+xml" data="assets/1444394480_lab.svg" style="width:100px; height:100px; padding-right:10px; position:absolute"></object>
+	<div style="margin-left:110px; margin-right:40px">
+		<h1><a href="#">Desktop Tools</a></h1>
+		<p>Create 32-bit Windows VST or Buzz plugins from Designer projects using the linxgen command line tool.</p>
+		<ul>
+			<li><a href="linxaudio-0.0.2.zip">Download Win32 executable and precompiled modules</a> (version 0.0.2, october 31 2015)</a></li>
+		</ul>
+	</div>
+</bigbox-->
+
+<bigbox>
+	<div style="margin-left:110px; margin-right:40px">
+		<h1>About</h1>
+		<p>
+			Graph designer: Modular audio framework to create audio plugins without a compiler or full development environment. 
+		</p>
+		<p>
+			Sequencer/tracker composer: Automate MIDI and value pins in the project's interface using tracker style patterns. 
+		</p>
+		<p>
+			Connect DSP modules through compatible pins to create new and more complex DSP modules. 
+			Select from a library of basic, precompiled DSP modules, such as f.ex filter, delay, oscillator, envelope generator. 
+			A module operates on values, buffers and midi messages exposed through its input and output pins. 
+		</p>
+		<p>
+		A module pin is defined by its direction - either output or input - and a
+		datatype. Output pins can be connected to compatible input pins. The possible
+		datatypes are:
+		</p>
+		<ul>
+			<li>float
+			<li>integer
+			<li>float buffer
+			<li>midi
+		</ul>
+		<p>
+		Some modules support subgraph processing in which parts of their 
+		processing can be defered to a separate user-defined subgraph. F.ex
+		the delay module uses a subgraph to process the delay buffer, and the
+		polycontainer module clones the subgraph for each voice to
+		implement polyphonic oscillators.
+		</p>
+
+		<p>
+			Tested in latest Firefox and Chrome. Uses IndexedDB for local storage, WebAudio for sound input and output, canvas for drawing, 
+			XMLHttpRequest for sharing projects through <a href="http://myjson.com/">myjson.com</a>, and asm.js through Emscripten for performance 
+			and cross platform compatilility. 
+		</p>
+		<p style="color:red">
+			This is still a project under very much development and anything may break at any time!
+		</p>
+		<h1>linxgen</h1>
+		<p>
+		linxgen.exe is a command line tool to compile JSON and link object files into a shared
+		library executable (DLL) usable by your preferred DAW host.
+		</p>
+		<p>
+		Directory structure:
+		</p>
+		<ul>
+				<li>linxgen.exe
+				<li>SimpleDelay.json
+				<li>lib/cl-x86/*.obj
+		</ul>
+		<p>
+		Usage to create SimpleDelayVST.dll plugin for VST hosts:
+		</p>
+<pre>
+    linxgen SimpleDelay.json vst-win32
+</pre>
+		<p>
+		Usage to create SimpleDelayBuzz.dll plugin for Buzz (or Buze):
+		</p>
+<pre>
+    linxgen SimpleDelay.json buzz-win32
+</pre>
+		<p>
+			Linxgen looks for object files in directories resolved from the target search paths in the JSON relative to the program directory.
+			F.ex both targets "buzz-win32" and "vst-win32" specify "lib/cl-x86" in the search path.
+		</p>
+
+		<h1>Licensing and notes on commercial use</h1>
+		<p>
+		linxgen.exe is made from code primarily licenced under the LGPL. This license
+		applies only to the graph compiler and linker, and *not* the executable output
+		files created by the tool.
+		</p>
+		<p>
+		However, most of the standard modules included with linxgen are released under
+		the LGPL as well, so any executables using standard modules will still fall
+		under the LGPL!
+		</p>
+		<p>
+		The core graph code and host interface implementations are licenced under the 
+		BSD-license. This permits advanced users to create and redistribute plugins
+		under any license, provided *none* of the LGPL standard libraries and modules
+		are used.
+		</p>
+		<p>
+		Be aware that JSON graph description files also automatically fall under the
+		LGPL when using the standard libraries and modules. The LGPL does not permit
+		distribution of executable binaries unless all the source code is also made
+		available. The JSON is a vital part of the plugin source code.
+		</p>
+		<p>
+		The idea is to keep the development of the core tools and libraries open, but
+		still allow private and commercial use by advanced users.
+		</p>
+
+		<h1>Dependencies and credits</h1>
+		<p>
+		PE Bliss (c) DX 2011-2012, kaimi.ru<br />
+		Library is free to use in both commertial and non-commertial projects.<br />
+		https://code.google.com/p/portable-executable-library/
+		</p>
+
+		<p>
+		Libelf Copyright (C) 1995 - 2009 Michael Riepe<br />
+		Libelf is released under the terms of the GNU Library General Public License.<br />
+		http://www.mr511.de/software/english.html
+		</p>
+	</div>
+</bigbox>
+</body>
+</html>

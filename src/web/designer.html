@@ -1,0 +1,2364 @@
+<html>
+<head>
+	<script src="js/util/array.find.js"></script>
+	<script src="js/util/minivents.min.js"></script>
+	<script src="js/util/htmlhelper.js"></script>
+	<script src="js/plugin-project.js"></script>
+	<script src="js/storage.js"></script>
+	<script src="js/key-signature.js"></script>
+	<script src="js/ui/pianocanvas.js"></script>
+	<script src="js/ui/graphitor.js"></script>
+	<script src="js/ui/aboutdesignerpopup.js"></script>
+	<script src="js/ui/connectionpopup.js"></script>
+	<script src="js/ui/jsonpopup.js"></script>
+	<script src="js/ui/savepopup.js"></script>
+	<script src="js/ui/modulepopup.js"></script>
+	<script src="js/ui/parameterpopup.js"></script>
+	<script src="js/ui/propagatepopup.js"></script>
+	<script src="js/ui/utilitypopup.js"></script>
+	<script src="js/ui/sequencepopup.js"></script>
+	<script src="js/ui/patterneditor.js"></script>
+	<script src="js/ui/sequenceeditor.js"></script>
+	<style>
+body {
+	margin:0;
+	padding:0;
+	font-family:helvetica;
+	font-size:12px;
+	overflow:hidden;
+}
+
+h1 {
+	margin:0;
+	padding:0;
+}
+
+table {
+	font-size:100%;
+}
+
+popup {
+	position:absolute;
+	background-color:white;
+	left:25%;top:25%;
+	right:25%;bottom:25%;
+	z-index:11;
+}
+
+overlay {
+	position:absolute;
+	display:none;
+	left:0;
+	top:0;
+	right:0;
+	bottom:0;
+	background-color:rgba(255, 255, 255, .3);
+	z-index:10;
+}
+
+floating {
+	position:absolute;
+	background-color:white;
+	border-left:2px solid #ddd;
+	border-top:2px solid #ddd;
+	border-right:2px solid #aaa;
+	border-bottom:2px solid #aaa;
+	padding:5px;
+	display:none;
+	left:0;
+	top:0;
+	width:200px;
+	height:200px;
+	z-index:9;
+}
+
+.unselectable {
+	-moz-user-select: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	cursor: default;
+}
+
+.big separator {
+	display:inline-block;
+	border-right:2px solid #ddd;
+	height:42px;
+	vertical-align:bottom;	
+}
+
+toolbarbutton, toolbarnumber, toolbardropdown {
+	display:inline-block;
+	padding-left:8px;
+	padding-right:8px;
+	vertical-align:top;
+}
+
+.big toolbarbutton {
+	padding-top:15px;
+	height:30px;
+}
+
+.big toolbarnumber, .big toolbardropdown {
+	padding-top:12px;
+	height:30px;
+}
+
+.small toolbarbutton {
+	padding-top:4px;
+	height:20px;
+}
+
+.small toolbardropdown {
+	padding-top:2px;
+	height:20px;
+}
+
+toolbarbutton:hover {
+	background-color:#f8f8f8;
+}
+
+toolbarbutton.highlight {
+	background-color:#ffffff;
+}
+
+toolbarbutton icon {
+	background-repeat:no-repeat;
+	display:inline-block;
+	width:16px;
+	height:15px;
+	vertical-align:middle;
+}
+
+toolbarbutton label {
+	display:inline-block;
+	padding-left:4px;
+	padding-right:2px;
+	vertical-align:bottom;
+}
+
+toolbarbutton icon.seq {
+	background-image:url('assets/ico_seq.png');
+}
+
+toolbarbutton icon.pat {
+	background-image:url('assets/ico_pat.png');
+}
+
+toolbarbutton icon.mac {
+	background-image:url('assets/ico_mac.png');
+}
+
+toolbarbutton icon.itf {
+	background-image:url('assets/ico_itf.gif');
+}
+
+toolbarbutton icon.new {
+	background-image:url('assets/ico_new.png');
+}
+
+toolbarbutton icon.opn {
+	background-image:url('assets/ico_opn.png');
+}
+
+toolbarbutton icon.sav {
+	background-image:url('assets/ico_sav.png');
+}
+
+toolbarbutton icon.ply {
+	background-image:url('assets/ico_ply.png');
+}
+
+toolbarbutton icon.pls {
+	background-image:url('assets/ico_pls.png');
+}
+
+toolbarbutton icon.stp {
+	background-image:url('assets/ico_stp.png');
+}
+
+toolbarbutton icon.cut {
+	background-image:url('assets/ico_cut.png');
+}
+
+toolbarbutton icon.cpy {
+	background-image:url('assets/ico_cpy.png');
+}
+
+toolbarbutton icon.pas {
+	background-image:url('assets/ico_pas.png');
+}
+
+toolbarbutton icon.utl {
+	background-image:url('assets/ico_utl.png');
+}
+
+toolbarnumber label {
+	margin-right:0.5em;
+	vertical-align:middle;
+}
+
+toolbarnumber input {
+	width:4em;
+}
+
+	</style>
+</head>
+<body>
+<div id="requirements">
+	Requires Web Audio, Web Worker, IndexedDB, XMLHttpRequest, Canvas and preferably asm.js.
+</div>
+<div id="loading" style="display:none">
+	Starting the audio engine...
+</div>
+
+<script>
+
+function ViewToolbar(parent, className) {
+	this.container = document.createElement("div");
+	//this.container.style.display = "inline-block";
+	//this.container.sty
+	this.container.classList.add(className);
+
+	parent.appendChild(this.container);
+	
+	Events(this);
+}
+
+ViewToolbar.prototype.highlight = function(highlightButton) {
+	var buttons = [ this.sequenceButton, this.patternButton, this.graphButton, this.propagateButton ];
+	buttons.forEach(function(button) {
+		button.classList.remove("highlight");
+		if (button == highlightButton) {
+			button.classList.add("highlight");
+		}
+	});
+}
+
+ViewToolbar.prototype.createNumber = function(text, value, changeHandler) {
+	var element = document.createElement("toolbarnumber");
+	
+	var label = document.createElement("label");
+	label.innerHTML = text;
+	
+	var input = document.createElement("input");
+	input.type = "number";
+	input.value = value;
+	if (changeHandler) {
+		input.addEventListener("change", changeHandler);
+	}
+
+	element.appendChild(label);
+	element.appendChild(input);
+
+	this.container.appendChild(element);
+	return element;
+
+}
+
+ViewToolbar.prototype.createButton = function(text, iconClass, clickHandler) {
+	var element = document.createElement("toolbarbutton");
+	
+	if (iconClass) {
+		var icon = document.createElement("icon");
+		icon.classList.add(iconClass);
+		element.appendChild(icon);
+	}
+
+	if (text) {
+		var label = document.createElement("label");
+		label.innerHTML = text;
+		element.appendChild(label);
+	}
+
+	if (clickHandler) {
+		element.addEventListener("click", clickHandler);
+	}
+	
+	this.container.appendChild(element);
+	return element;
+}
+
+
+ViewToolbar.prototype.createDropdown = function(text, value, values, bindHandler, changeHandler) {
+	var element = document.createElement("toolbardropdown");
+	
+	var label = document.createElement("label");
+	label.innerHTML = text;
+	
+	var select = document.createElement("select");
+	if (changeHandler) {
+		select.addEventListener("change", changeHandler);
+	}
+	HTMLSelectHelper.bindArray(select, values, bindHandler);
+	
+	select.value = value;
+
+	element.appendChild(label);
+	element.appendChild(select);
+
+	this.container.appendChild(element);
+	return element;
+
+}
+
+
+var BUFFER_SIZE = 1024;
+
+function AudioClient() {
+	var self = this;
+	
+	this.callbackQueue = [];
+	this.worker = new Worker("js/plugin-worker.js");
+	this.worker.onmessage = processWorkerMessage;
+
+	function processWorkerMessage(e) {
+		switch (e.data.command) {
+			case "describeValueResponse":
+				var handler = self.getHandler("describeValue");
+				handler.callback(e.data.value);
+				break;
+			case "processAudioResponse":
+				var handler = self.getHandler("processAudio");
+				handler.callback(e.data.buffer);
+				break;
+			case "getEdgeDigestResponse":
+				var handler = self.getHandler("getEdgeDigest");
+				handler.callback(e.data.buffer);
+				break;
+			case "getFactoriesResponse":
+				// init user side project from serialised factories list
+				var factories = [];
+				e.data.factories.forEach(function(f) {
+					var factory = importFactory(f);
+					factories.push(factory);
+				});
+
+				var handler = self.getHandler("getFactories");
+				handler.callback(factories);
+				break;
+		}
+	}
+	
+	function importFactory(f) {
+		// pins dont have prototype so we should get away with this:
+		return new LinxFactory(f.factoryPtr, f.name, f.symbol, f.file, f.deps, f.pins, f.subgraphPins, f.isSubgraphParent, f.category, f.description);
+	}
+}
+
+AudioClient.prototype.getHandler = function(name) {
+	var handler = this.callbackQueue.shift();
+	if (handler.command != name) {
+		throw new Error("Handler queue inconsistency, expected '" + name + "', got '" + handler.command + "'");
+	}
+	return handler;
+}
+
+AudioClient.prototype.playFromStart = function() {
+	this.worker.postMessage({
+		command : "playFromStart"
+	});
+}
+
+AudioClient.prototype.play = function() {
+	this.worker.postMessage({
+		command : "play"
+	});
+}
+
+AudioClient.prototype.stop = function() {
+	this.worker.postMessage({
+		command : "stop"
+	});
+}
+
+AudioClient.prototype.setPosition = function(value) {
+	this.worker.postMessage({
+		command : "setPosition",
+		value : value
+	});
+}
+
+AudioClient.prototype.setBufferSize = function(value) {
+	this.worker.postMessage({
+		command : "setBufferSize",
+		value : value
+	});
+}
+
+AudioClient.prototype.setSampleRate = function(value) {
+	this.worker.postMessage({
+		command : "setSampleRate",
+		value : value
+	});
+}
+
+AudioClient.prototype.setBpm = function(value) {
+	this.worker.postMessage({
+		command : "setBpm",
+		value : value
+	});
+}
+
+AudioClient.prototype.setTpb = function(value) {
+	this.worker.postMessage({
+		command : "setTpb",
+		value : value
+	});
+}
+
+AudioClient.prototype.setKey = function(value) {
+	this.worker.postMessage({
+		command : "setKey",
+		value : value
+	});
+}
+
+AudioClient.prototype.setScale = function(value) {
+	this.worker.postMessage({
+		command : "setScale",
+		value : value
+	});
+}
+
+AudioClient.prototype.parameterChange = function(graphId, vertex, pinName, value) {
+	this.worker.postMessage({
+		command : "parameterChange",
+		graphId : graphId,
+		vertex : vertex,
+		pinName : pinName,
+		value : value
+	});
+}
+
+AudioClient.prototype.processNote = function(graphId, vertex, pinName, note, velocity) {
+	this.worker.postMessage({
+		command : "processNote",
+		graphId : graphId,
+		vertex : vertex,
+		pinName : pinName,
+		note : note,
+		velocity : velocity
+	});
+}
+
+AudioClient.prototype.compileProject = function(objectProject) {
+	this.worker.postMessage({
+		command : "compileProject", 
+		project : objectProject
+	});
+}
+
+AudioClient.prototype.processAudio = function(callback) {
+	this.callbackQueue.push({ command : "processAudio", callback : callback } );
+	this.worker.postMessage({
+		command : "processAudio", 
+		numSamples : BUFFER_SIZE
+	});
+}
+
+AudioClient.prototype.returnAudioBuffer = function(buffer) {
+	var transferObjects = [];
+	for (var i = 0; i < buffer ? buffer.channels.length : 0; i++) {
+		transferObjects[i] = buffer.channels[i].buffer;
+	}
+	this.worker.postMessage({
+		command : "returnAudioBuffer", 
+		buffer : buffer
+	}, transferObjects);
+}
+
+AudioClient.prototype.getFactories = function(callback) {
+	this.callbackQueue.push({ command : "getFactories", callback : callback } );
+	this.worker.postMessage({ command : "getFactories" });
+}
+
+AudioClient.prototype.describeValue = function(graphId, vertexId, pinName, value, callback) {
+	// queue calback, call it when handling response
+	this.callbackQueue.push({ command : "describeValue", callback : callback } );
+	this.worker.postMessage({
+		command : "describeValue",
+		graphId : graphId,
+		vertexId : vertexId,
+		pinName : pinName,
+		value : value
+	});
+}
+
+AudioClient.prototype.getEdgeDigest = function(graphId, callback) {
+	this.callbackQueue.push({ command : "getEdgeDigest", callback : callback } );
+	this.worker.postMessage({
+		command : "getEdgeDigest", 
+		graphId : graphId
+	});
+}
+
+
+function App() {
+	var self = this;
+
+	if (!(window.AudioContext || window.webkitAudioContext)) {
+		return ;
+	}
+	
+	if (!window.indexedDB) {
+		return ;
+	}
+	
+	if (!(!!window.HTMLCanvasElement)) {
+		return ;
+	}
+
+	if (!(!!window.Worker)) {
+		return ;
+	}
+
+	this.aboutPopup = null;
+	this.jsonPopup = null;
+	this.savePopup = null;
+	this.modulePopup = null;
+	this.connectionPopup = null;
+	this.propagatePopup = null;
+	this.utilityPopup = null;
+	this.sequencePopup = null;
+	this.graphEditor = null;
+	this.sequenceEditor = null;
+	this.patternEditor = null;
+	this.mainToolbar = null;
+	this.viewToolbar = null;
+	
+	this.context = null;
+	this.audioClient = null;
+	this.scriptProcessor = null;
+	
+	this.storage = null;
+	this.pluginProjectHeaders = [];
+	this.floatingPopups = [];
+	this.inputStack = [];
+	
+	this.project = null;
+	this.dirtyRecompile = false;
+	this.dirtyGraphEditor = false;
+	this.dirtySequenceEditor = false;
+	this.dirtyMasterToolbar = false;
+	this.dirtyPatternEditorContainerList = false;
+	this.dirtyPatternEditorPatternList = false;
+	this.dirtySequenceEditorPatternList = false;
+
+	requirements.style.display = "none";
+	loading.style.display = "block";
+	
+	// init audio worker and wait for it to return factories to initialise the project and user interface
+	this.initAudio(audioReady);
+	
+	function audioReady() {
+		loading.style.display = "none";
+		self.initUserInterface();
+	}
+}
+
+App.prototype.initUserInterface = function() {
+	this.initKeyboard();
+	this.initMouse();
+	this.initStorage();
+	this.initMainFrame();
+	this.initGraphEditor();
+	this.initPatternEditor();
+	this.initSequenceEditor();
+	this.initAboutPopup();
+	this.initJsonPopup();
+	this.initSavePopup();
+	this.initModulePopup();
+	this.initConnectionPopup();
+	this.initPropagatePopup();
+	this.initUtilityPopup();
+	this.initSequencePopup();
+
+	this.currentGraph = this.project.graph;
+	this.bindGraphEditor();
+	
+	this.showGraphEditor();
+	
+	var myjson = QueryString.parameters["myjson"];
+	if (myjson) {
+		this.jsonPopup.show();
+		this.inputStack.push(this.jsonPopup);
+	} else {
+		this.aboutPopup.show();
+		this.inputStack.push(this.aboutPopup);
+	}
+
+	this.render();
+}
+
+App.prototype.clearDirtyFlags = function() {
+	if (this.dirtyRecompile) {
+		this.recompileProject();
+		this.dirtyRecompile = false;
+	}
+	
+	if (this.dirtyMasterToolbar) {
+		this.updateMasterToolbar();
+		this.dirtyMasterToolbar = false;
+	}
+	
+	if (this.dirtyGraphEditor) {
+		this.bindGraphEditor();
+		this.dirtyGraphEditor = false;
+	}
+	
+	if (this.dirtyPatternEditorContainerList) {
+		this.patternEditor.updateContainerList();
+		this.dirtyPatternEditorContainerList = false;
+	}
+
+	if (this.dirtyPatternEditorPatternList) {
+		this.patternEditor.updatePatternList();
+		this.dirtyPatternEditorPatternList = false;
+	}
+
+	if (this.dirtySequenceEditorPatternList) {
+		this.sequenceEditor.updatePatternList();
+		this.dirtySequenceEditorPatternList = false;
+	}
+}
+
+App.prototype.initProject = function(factories) {
+	var self = this;
+
+	this.project = new LinxProject(factories);
+
+	this.project.on("clear", clear);
+	
+	this.project.on("insertVertex", insertVertex);
+	this.project.on("deleteVertex", deleteVertex);
+	this.project.on("updateVertex", updateVertex);
+
+	this.project.on("insertEdge", insertEdge);
+	this.project.on("deleteEdge", deleteEdge);
+
+	this.project.on("insertPinref", insertPinref);
+	this.project.on("deletePinref", deletePinref);
+
+	this.project.on("insertSequenceTrack", insertSequenceTrack);
+
+	this.project.on("insertPattern", insertPattern);
+
+	this.project.on("insertPatternEvent", insertPatternEvent);
+	this.project.on("updatePatternEvent", updatePatternEvent);
+	this.project.on("deletePatternEvent", deletePatternEvent);
+
+	function clear() {
+		self.currentGraph = self.project.graph;
+		self.dirtyRecompile = true;
+		self.dirtyGraphEditor = true;
+		self.dirtyMasterToolbar = true;
+	}
+	
+	function insertVertex() {
+		self.dirtyRecompile = true;
+		self.dirtyGraphEditor = true;
+	}
+
+	function deleteVertex() {
+		self.dirtyRecompile = true;
+		self.dirtyGraphEditor = true;
+	}
+
+	function updateVertex() {
+		self.dirtyRecompile = true;
+		self.dirtyGraphEditor = true;
+	}
+	
+	function insertEdge() {
+		self.dirtyRecompile = true;
+		self.dirtyGraphEditor = true;
+	}
+
+	function deleteEdge() {
+		self.dirtyRecompile = true;
+		self.dirtyGraphEditor = true;
+	}
+	
+	function insertPinref() {
+		self.dirtyRecompile = true;
+	}
+
+	function deletePinref() {
+		self.dirtyRecompile = true;
+	}
+
+	function insertSequenceTrack() {
+		self.dirtyPatternEditorContainerList = true;
+		self.dirtyRecompile = true;
+	}
+
+	function insertPattern() {
+		self.dirtyPatternEditorPatternList = true;
+		self.dirtySequenceEditorPatternList = true;
+		self.dirtyRecompile = true;
+	}
+
+	function insertPatternEvent() {
+		self.dirtyRecompile = true;
+	}
+
+	function updatePatternEvent() {
+		self.dirtyRecompile = true;
+	}
+	
+	function deletePatternEvent() {
+		self.dirtyRecompile = true;
+	}
+
+}
+
+App.prototype.initAudio = function(readyCallback) {
+	this.context = createAudioContext();
+
+	this.audioClient = new AudioClient();
+	this.audioClient.setBufferSize(BUFFER_SIZE);
+	this.audioClient.getFactories(getFactoriesResponse);
+	
+	this.scriptProcessor = this.context.createScriptProcessor(BUFFER_SIZE, 2, 2);	
+	this.scriptProcessor.onaudioprocess = processAudio;
+	this.scriptProcessor.connect(this.context.destination);
+	
+	var self = this;
+	var bufferQueue = [];
+	
+	function getFactoriesResponse(factories) {
+		self.initProject(factories);
+		readyCallback();
+	}
+
+	function processAudio(e) {
+
+		// copy from a queue of shared buffers, request a new buffer
+		if (bufferQueue.length > 0) {
+			var outputBuffer = bufferQueue.shift();
+			
+			if (outputBuffer.channels.length >= 2) {
+				for (var i = 0; i < 2; i++) {
+					var srcBuffer = outputBuffer.channels[i];
+					var destBuffer = e.outputBuffer.getChannelData(i);
+					destBuffer.set(srcBuffer);
+				}
+			} else if (outputBuffer.channels.length == 1) {
+				var srcBuffer = outputBuffer.channels[0];
+				var destBufferL = e.outputBuffer.getChannelData(0);
+				var destBufferR = e.outputBuffer.getChannelData(1);
+				destBufferL.set(srcBuffer);
+				destBufferR.set(srcBuffer);
+			}
+			self.audioClient.returnAudioBuffer(outputBuffer);
+		}
+		
+		if (bufferQueue.length < 2) {
+			// dont queue too many buffers!
+			self.audioClient.processAudio(function(buffer) {
+				if (buffer) {
+					bufferQueue.push(buffer);
+				}
+			});
+		}
+	}
+
+	function createAudioContext() {
+		var context = new (window.AudioContext || window.webkitAudioContext)();
+		if (!context.createGain) {
+			context.createGain = context.createGainNode;
+		}
+		if (!context.createDelay) {
+			context.createDelay = context.createDelayNode;
+		}
+		if (!context.createScriptProcessor) {
+			context.createScriptProcessor = context.createJavaScriptNode;
+		}
+		return context;
+	}
+
+}
+
+App.prototype.initMainFrame = function() {
+	var self = this;
+	var scales = [ "major", "minor" ];
+	var notes = [ "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" ];
+	function patternClick() { self.showPatternEditor(); }
+	function graphClick() { self.showGraphEditor(); }
+	function sequenceClick() { self.showSequenceEditor(); }
+	function propagateClick() { self.showPropagatePopup(); }
+	function newClick() { self.clearProject(); }
+	function openClick() { self.showOpenPopup(); }
+	function saveClick() { self.showSavePopup(); }
+	function playFromStartClick() {
+		self.audioClient.playFromStart();
+	}
+	function playClick() {
+		self.audioClient.play();
+	}
+	function stopClick() {
+		self.audioClient.stop();
+	}
+	
+	function changeBpm(e) {
+		var value = parseInt(e.target.value);
+		if (value > 0 && value <= 9999) {
+			self.project.bpm = value;
+			self.audioClient.setBpm(value);
+		} else {
+			self.updateMasterToolbar();
+		}
+	}
+
+	function changeTpb(e) {
+		var value = parseInt(e.target.value);
+		if (value > 0 && value <= 32) {
+			self.project.tpb = value;
+			self.audioClient.setBpm(tpb);
+		} else {
+			self.updateMasterToolbar();
+		}
+	}
+
+	function changeKey(e) {
+		var value = parseInt(e.target.value);
+		self.project.key = value;
+		self.audioClient.setKey(value);
+	}
+	
+	function changeScale(e) {
+		var value = e.target.value;
+		self.project.scale = value;
+		self.audioClient.setScale(value);
+	}
+	
+	function bindArrayIndex(opt, item, index) {
+		opt.text = item;
+		opt.value = index;
+	}
+
+	function bindArrayValue(opt, item) {
+		opt.text = item;
+		opt.value = item;
+	}
+	
+	this.mainToolbar = document.createElement("div");
+	HTMLBoxHelper.setLeftTop(this.mainToolbar, "absolute", "0", "0", "100%", "48px");
+	this.mainToolbar.style.backgroundColor = "#eeeeee";
+	//this.mainToolbar.innerHTML = "<h1>Designer</h1>";
+	
+	this.viewToolbar = new ViewToolbar(this.mainToolbar, "big");
+	
+	this.viewToolbar.patternButton = this.viewToolbar.createButton("Patterns", "pat", patternClick);
+	this.viewToolbar.graphButton = this.viewToolbar.createButton("Graph", "mac", graphClick);
+	this.viewToolbar.sequenceButton = this.viewToolbar.createButton("Sequencer", "seq", sequenceClick);
+	
+	this.viewToolbar.container.appendChild(document.createElement("separator"));
+	
+	this.viewToolbar.propagateButton = this.viewToolbar.createButton("Propagate...", "itf", propagateClick);
+	this.viewToolbar.openButton = this.viewToolbar.createButton("New", "new", newClick);
+	this.viewToolbar.openButton = this.viewToolbar.createButton("Open...", "opn", openClick);
+	this.viewToolbar.saveButton = this.viewToolbar.createButton("Save...", "sav", saveClick);
+
+	this.viewToolbar.container.appendChild(document.createElement("separator"));
+	
+	this.viewToolbar.bpmInput = this.viewToolbar.createNumber("BPM", this.project.bpm, changeBpm);
+	this.viewToolbar.tpbInput = this.viewToolbar.createNumber("TPB", this.project.tpb, changeTpb);
+	
+	 // createDropDown, provide list of notes, then scales
+	this.viewToolbar.keyNoteInput = this.viewToolbar.createDropdown("Key", this.project.key, notes, bindArrayIndex, changeKey);
+	this.viewToolbar.keyScaleInput = this.viewToolbar.createDropdown("Scale", this.project.scale, scales, bindArrayValue, changeScale);
+	
+	this.viewToolbar.container.appendChild(document.createElement("separator"));
+	
+	this.viewToolbar.playFromStartButton = this.viewToolbar.createButton("", "pls", playFromStartClick);
+	this.viewToolbar.playButton = this.viewToolbar.createButton("", "ply", playClick);
+	this.viewToolbar.stopButton = this.viewToolbar.createButton("", "stp", stopClick);
+	
+	document.body.appendChild(this.mainToolbar);
+
+	this.mainContainer = document.createElement("div");
+	HTMLBoxHelper.setLeftTopRightBottom(this.mainContainer, "absolute", "0", "48px", "0", "0");
+	document.body.appendChild(this.mainContainer);	
+}
+
+App.prototype.updateMasterToolbar = function() {
+	this.viewToolbar.bpmInput.childNodes[1].value = this.project.bpm;
+	this.viewToolbar.tpbInput.childNodes[1].value = this.project.tpb;
+	this.viewToolbar.keyNoteInput.childNodes[1].value = this.project.key;
+	this.viewToolbar.keyScaleInput.childNodes[1].value = this.project.scale;
+}
+
+App.prototype.render = function() {
+	var self = this;
+
+	function render() {
+		self.render();
+	}
+	
+	this.clearDirtyFlags();
+
+	if (this.graphEditor.canvas.style.display != "none") {
+		this.graphEditor.render();
+	} else if (this.sequenceEditor.container.style.display != "none") {
+		this.sequenceEditor.render();
+	} else if (this.patternEditor.container.style.display != "none") {
+		this.patternEditor.render();
+	}	
+
+	requestAnimationFrame(render);
+}
+
+App.prototype.initAboutPopup = function() {
+	var self = this;
+	
+	function hide() {
+		self.closeActivateParent(self.aboutPopup);
+	}
+	
+	this.aboutPopup = new AboutDesignerPopup();
+	this.aboutPopup.on("hide", hide);
+	
+	document.body.appendChild(this.aboutPopup.container);
+}
+
+App.prototype.clearProject = function() {
+	this.project.clear();
+}
+
+App.prototype.initJsonPopup = function() {
+	var self = this;
+	
+	function hide() {
+		self.closeActivateParent(self.jsonPopup);
+	}
+	
+	function load(text) {
+		self.project.clear();
+		
+		if (!self.project.parseJsonProject(text)) {
+			console.log("loading error");
+			return ;
+		}
+		
+		self.jsonPopup.hide();		
+		self.currentGraph = self.project.graph;
+		self.updateMasterToolbar();
+		console.log("loaded");
+	}
+	
+	function requestResourceList(result) {
+	
+		// if querysring myjsonid", add w previx
+		var myjson = QueryString.parameters["myjson"];
+		if (myjson) {
+			myjson.split(",").forEach(function(myjsonId) {
+				result.push({
+					name : "Import myjson.com/" + myjsonId + "", 
+					value : "myjson:" + myjsonId
+				});
+			});
+		}
+	
+		self.pluginProjectHeaders.forEach(function(project) {
+			result.push({
+				name : project.product, 
+				value : "indexdb:" + project.product
+			});
+		});		
+	}
+
+	function requestResource(resourceUri, callback) {
+		var cp = resourceUri.indexOf(":");
+		if (cp == -1) return ;
+		var resourceParts = [ resourceUri.substr(0, cp), resourceUri.substr(cp + 1) ];
+
+		if (resourceParts[0] == "myjson") {
+			// getJSON calls the jsonPopup via the request callback, does not have an error handler
+			Ajax.getJSON("https://api.myjson.com/bins/" + resourceParts[1], callback);
+		} else if (resourceParts[0] == "indexdb") {
+			// getPluginProject calls the jsonPopup via the request callback:
+			self.storage.getPluginProject(resourceParts[1], callback);
+		} else if (resourceParts[0] == "ajax") {
+			Ajax.getJSON(resourceParts[1], callback);
+		} else {
+			console.log("dont know how to load " + resourceUri);
+		}
+	}
+
+	this.jsonPopup = new JsonPopup();
+	this.jsonPopup.on("hide", hide);
+	this.jsonPopup.on("load", load);
+	this.jsonPopup.on("requestResourceList", requestResourceList);
+	this.jsonPopup.on("requestResource", requestResource);
+	
+	document.body.appendChild(this.jsonPopup.container);
+}
+
+App.prototype.initSavePopup = function() {
+	var self = this;
+	
+	function hide() {
+		self.closeActivateParent(self.savePopup);
+	}
+
+	function save(project) {
+		// save in local storage, project name is the unique primary key
+		var objectProject = self.project.saveJsonProject();
+		var projectHeader = self.pluginProjectHeaders.find(function(project) {
+			return project.product == objectProject.system.product;
+		});
+		
+		self.storage.savePluginProject(objectProject);
+
+		if (!projectHeader) {
+			self.pluginProjectHeaders.push({product:objectProject.system.product, author:objectProject.system.author});
+		}
+	}
+	
+	function share(project) {
+		function sendError(errorCode) {
+			console.log("share error " + errorCode);
+		}
+		
+		function sendUpdateSuccess(data) {
+			console.log("successfully updated project on myjson.com");
+		}
+
+		function sendInsertSuccess(data) {
+			console.log("saved new myjson.com todo update project and savepopup! ");
+			console.log(data);
+			
+			// extract id from response of form {"uri":"https://api.myjson.com/bins/:id"}
+			if (!data || !data.uri) {
+				console.log("cannot read response");
+				return ;
+			}
+
+			var ls = data.uri.lastIndexOf("/");
+			if (ls == -1) {
+				console.log("response uri doesnt have slash");
+				return ;
+			}
+			
+			self.project.myjsonId = data.uri.substr(ls + 1);
+			
+			// rebind save popup w/new myjson id
+
+			self.bindSavePopup();
+		}
+	
+		var objectProject = self.project.saveJsonProject();
+		delete objectProject.system.myjsonId; // shared projects have no myjsonid
+
+		if (project.myjsonId) {
+			console.log("UPDATE");
+			Ajax.sendJSON("PUT", "https://api.myjson.com/bins/" + project.myjsonId, objectProject, sendUpdateSuccess, sendError);
+		} else {
+			console.log("INSERT");
+			Ajax.sendJSON("POST", "https://api.myjson.com/bins", objectProject, sendInsertSuccess, sendError);
+		}
+		// http post or put to get or update project
+		// must return myjsonid! = update project.w/uniqueid
+	}
+
+	function updateProject(project) {
+		self.project.name = project.name;
+		self.project.author = project.author;
+		self.project.uniqueId = project.uniqueId;
+		console.log("project changed!");
+	}
+
+	this.savePopup = new SavePopup();
+	this.savePopup.on("hide", hide);
+	this.savePopup.on("save", save);
+	this.savePopup.on("share", share);
+	this.savePopup.on("updateProject", updateProject);
+	
+	document.body.appendChild(this.savePopup.container);
+}
+
+App.prototype.bindSavePopup = function() {
+	var editProject = { name: this.project.name, author: this.project.author, uniqueId:this.project.uniqueId, myjsonId: this.project.myjsonId };
+	var editFields = [
+		new SavePopupField("Name (primary key in local IndexedDB database)", "name"),
+		new SavePopupField("Author", "author"),
+		new SavePopupField("Unique ID (embedded in VST synths for identification in some hosts)", "uniqueId"),
+	];
+	this.savePopup.bindProject(editProject, editFields);
+
+}
+
+App.prototype.initModulePopup = function() {	
+	var self = this;
+	
+	function hide() {
+		self.closeActivateParent(self.modulePopup);
+	}
+
+	function newModule(name) {
+		var position = self.graphEditor.clickPosition;
+		if (name.startsWith("module:")) {
+			console.log("new module " + name);
+			name = name.substr(7);
+			var instanceName = self.currentGraph.getNewVertexName(name);
+			var factory = self.project.getFactory(name);
+			var vertex = self.project.addVertex(self.currentGraph, instanceName, factory, position.x, position.y);
+		} else if (name.startsWith("indexdb:")) {
+			name = name.substr(8);
+			console.log("import project");
+			self.storage.getPluginProject(name, function(objectProject) {				
+				// create container, then import into it
+				var instanceName = self.currentGraph.getNewVertexName(name);
+				var factory = self.project.getFactory("container");
+				var vertex = self.project.addVertex(self.currentGraph, instanceName, factory, position.x, position.y);				
+				self.project.parseJsonGraph(vertex, vertex.subgraph, objectProject.graph, objectProject.subgraphs);
+			});
+		} else {
+			console.log("dont know how to create " + name);
+		}
+	}
+	
+	function requestModuleList(result) {
+		self.project.factories.forEach(function(factory) {
+			result.push({ value:"module:" + factory.name, name:factory.name, category:factory.category });
+		});
+		
+		self.pluginProjectHeaders.forEach(function(project) {
+			result.push({ value:"indexdb:" + project.product, name:project.product, category:"Project" });
+		});
+	}
+	
+	function requestModuleInfo(name, callback) {
+
+		function formatNumber(value) {
+			if (Math.abs(value) > 1000000) {
+				return value.toExponential(3);
+			} else {
+				return value.toFixed();
+			}
+		}
+		
+		function describeRange(pin) {
+			if (pin.type == 0 || pin.type == 1 || pin.type == 2 || pin.type == 3) {
+				return "[" + formatNumber(pin.minValue) + ".." + formatNumber(pin.maxValue) + "]";
+			} else {
+				return "[..]";
+			}
+		}
+
+		function pinTypeToString(pin) {
+			if (pin.type == 0) {
+				return "float input";
+			} else if (pin.type == 1) {
+				return "float output";
+			} else if (pin.type == 2) {
+				return "int input";
+			} else if (pin.type == 3) {
+				return "int output";
+			} else if (pin.type == 4) {
+				return "MIDI input";
+			} else if (pin.type == 6) {
+				return "float buffer input";
+			} else if (pin.type == 7) {
+				return "float buffer output";
+			} else {
+				return "type " + pin.type;
+			}
+		}
+
+	
+		function describePin(name, pin) {
+			// but because the projects have pin names in the envelope this makes it a bit more complaks..
+			return "<tr><td>" + name + "</td><td>" + pinTypeToString(pin) + "</td><td>" + describeRange(pin) + "</td></tr>";
+		}
+	
+		if (name.startsWith("module:")) {
+			name = name.substr(7);
+			var factory = self.project.getFactory(name);
+			var moduleName = factory.name;
+			var moduleCategory = factory.category || "Module";
+			var moduleDescription = factory.description || "";
+			var modulePins = "<table>";
+			modulePins += "<tr><th>Name</th><th>Type</th><th>Range</th></tr>";
+			factory.pins.forEach(function(pin) {
+				modulePins += describePin(pin.name, pin);
+			});
+			modulePins += "</table>";
+			
+			var content = "<h1>" + moduleName + "</h1>" + "<p><b>Category:</b> " + moduleCategory + "</p>";
+			if (moduleDescription.length) {
+				content += "<p>" + moduleDescription + "</p>";
+			}
+			content += "<h2>Pins</h2>" + modulePins;
+			callback({
+				tabs : [ {
+					name : "General",
+					content : content
+				} ]
+			});
+			
+		} else if (name.startsWith("indexdb:")) {
+			name = name.substr(8);
+			var moduleCategory = "Project";
+			
+			self.storage.getPluginProject(name, function(objectProject) {								
+				var infoProject = new LinxProject(self.project.factories);
+				if (!infoProject.parseJsonProject(objectProject)) {
+					return ;
+				}
+				
+				// parse project to get pin details etc
+				var modulePins = "<table>";
+				infoProject.graph.propagatedPinRefs.forEach(function(pinref) {
+					var resolvedPinInfo = pinref.vertex.resolvePin(pinref.pin);
+					if (!resolvedPinInfo) {
+						return ;
+					}
+					
+					var pin = resolvedPinInfo.resolvedPin;
+					modulePins += describePin(pinref.name, pin);
+				});
+				modulePins += "</table>";
+				callback({
+					tabs : [ {
+						name : "General",
+						content : "<h1>" + infoProject.name + "</h1>" +
+							"<p>Category: " + moduleCategory + "</p>" +
+							"<p>Description: " + moduleDescription + "</p>" +
+							modulePins
+					} ]
+				});
+				
+			});
+			
+			// TODO: async getPluginProject means we cannot return pin info here - requestModuleInfo should return data through a callback
+			// OR!: include description+category in pluginProjectHeaders, and pins.. meh
+		}
+		
+	}
+	
+	this.modulePopup = new ModulePopup();
+	this.modulePopup.on("hide", hide);
+	this.modulePopup.on("newModule", newModule);
+	this.modulePopup.on("requestModuleList", requestModuleList);
+	this.modulePopup.on("requestModuleInfo", requestModuleInfo);
+	
+	document.body.appendChild(this.modulePopup.container);
+}
+
+App.prototype.initConnectionPopup = function() {
+	var self = this;
+	
+	function hide() {
+		self.closeActivateParent(self.connectionPopup);
+	}
+
+	function connect(targetVertexId, sourceVertexId, edges) {
+		//console.log("there are " + edges.length + " edges " + targetVertexId + " from " + sourceVertexId);
+		var targetVertex;
+		var sourceVertex;
+		
+		if (targetVertexId == "PARENT_OUT") {
+			targetVertex = self.currentGraph.parentVertex;
+		} else if (targetVertexId == "PARENT_IN" || targetVertexId == "PROPAGATE") {
+			return ;
+		} else {
+			targetVertex = self.currentGraph.getVertex(targetVertexId);
+			if (!targetVertex) {
+				console.log("cant connect " + targetVertexId)
+				return ;
+			}
+		}
+		
+		if (sourceVertexId == "PARENT_IN") {
+			sourceVertex = self.currentGraph.parentVertex;
+		} else if (sourceVertexId == "PARENT_OUT" || sourceVertexId == "PROPAGATE") {
+			return ;
+		} else {
+			sourceVertex = self.currentGraph.getVertex(sourceVertexId);
+			if (!sourceVertex) {
+				console.log("cant connect " + sourceVertexId)
+				return ;
+			}
+		}
+			
+		self.project.removeEdges(self.currentGraph, targetVertex, sourceVertex);
+		edges.forEach(function(edge) {
+			self.project.addEdge(self.currentGraph, targetVertex, edge.target, sourceVertex, edge.source);
+		});
+
+	}
+
+	function requestTargetList(targetVertexId, sourceVertexId, sourcePinId, result) {
+		// return target pins for selected source pin
+		var sourcePin;
+		
+		console.log("requestTargetList: " + sourceVertexId);
+		
+		if (sourceVertexId == "PARENT_IN") {
+			var sourcePinIndex = self.currentGraph.parentVertex.factory.getSubgraphPinIndex(sourcePinId);
+			sourcePin = self.currentGraph.parentVertex.factory.subgraphPins[sourcePinIndex];
+			console.log("parent_in:" , sourcePin);
+		} else if (sourceVertexId == "PARENT_OUT" || sourceVertexId == "PROPAGATE") {
+			return ;
+		} else {
+			var sourceVertex = self.currentGraph.getVertex(sourceVertexId);
+			var pinInfo = sourceVertex.resolvePin(sourcePinId);
+			sourcePin = pinInfo.resolvedPin;
+		}
+
+		if (targetVertexId == "PARENT_OUT") {
+			self.currentGraph.parentVertex.factory.subgraphPins.forEach(function(pin) {
+				if (self.currentGraph.parentVertex.factory.isPinCompatible(pin, sourcePin)) {
+					result.push({name:pin.name, value:pin.name});
+				}
+			});
+		} else if (targetVertexId == "PARENT_IN" || targetVertexId == "PROPAGATE") {
+			return;
+		} else {
+			var targetVertex = self.currentGraph.getVertex(targetVertexId);		
+			targetVertex.factory.pins.forEach(function(pin) {
+				if (targetVertex.factory.isPinCompatible(pin, sourcePin)) {
+					result.push({name:pin.name, value:pin.name});
+				}
+			});
+			if (targetVertex.factory.isSubgraphParent) {
+				targetVertex.subgraph.propagatedPinRefs.forEach(function(pinref) {
+					var pinInfo = targetVertex.resolvePin(pinref.name);
+					if (!pinInfo) {
+						console.log("cant resolve pin " + pinref.name + " on target vertex " + targetVertexId);
+						return ;
+					}
+					if (targetVertex.factory.isPinCompatible(pinInfo.resolvedPin, sourcePin)) {
+						result.push({name:pinref.name, value:pinref.name});
+					}
+				});
+			}
+		}
+	}
+
+	function requestSourceList(sourceVertexId, result) {
+		if (sourceVertexId == "PARENT_IN") {
+		
+			// subgraph parameters of self.currentGraph.parentVertex.factory.subgraphPins
+			self.currentGraph.parentVertex.factory.subgraphPins.forEach(function(pin) {
+				if (pin.type == 1 || pin.type == 3 || pin.type == 5 || pin.type == 7) {
+					result.push({name:pin.name, value:pin.name});
+				}
+			});
+		} else if (sourceVertexId == "PARENT_OUT" || sourceVertexId == "PROPAGATE") {
+			;
+		} else {
+			
+			var sourceVertex = self.currentGraph.getVertex(sourceVertexId);
+			
+			sourceVertex.factory.pins.forEach(function(pin) {
+				// update source list with "out" type pins
+				// TODO: linx_pin_is_in / linx_pin_is_out
+				if (pin.type == 1 || pin.type == 3 || pin.type == 5 || pin.type == 7) {
+					result.push({name:pin.name, value:pin.name});
+				}
+			});
+			
+			if (sourceVertex.factory.isSubgraphParent) {
+				//console.log("ai");
+				sourceVertex.subgraph.propagatedPinRefs.forEach(function(pinref) {
+					var pinInfo = sourceVertex.resolvePin(pinref.name);
+					if (pinInfo.resolvedPin.type == 1 || pinInfo.resolvedPin.type == 3 || pinInfo.resolvedPin.type == 5 || pinInfo.resolvedPin.type == 7) {
+						result.push({name:pinref.name, value:pinref.name});
+					}
+
+				});
+			}
+			
+		}
+	}	
+	
+	this.connectionPopup = new ConnectionPopup();
+	this.connectionPopup.on("hide", hide);
+	this.connectionPopup.on("connect", connect);
+	this.connectionPopup.on("requestTargetList", requestTargetList);
+	this.connectionPopup.on("requestSourceList", requestSourceList);
+	
+	document.body.appendChild(this.connectionPopup.container);
+}
+
+App.prototype.initPropagatePopup = function() {
+	var self = this;
+	
+	function hide() {
+		self.closeActivateParent(self.propagatePopup);
+	}
+	
+	function propagate(propagations) {
+		self.project.deletePinrefs(self.currentGraph);
+		propagations.forEach(function(propagation) {
+			var vertex = self.currentGraph.getVertex(propagation.vertex);
+			self.project.addPin(self.currentGraph, propagation.name, vertex, propagation.pin);
+		});
+	}
+	
+	function requestModuleList(result) {
+		self.currentGraph.vertices.forEach(function(vertex) {
+			result.push({ value:vertex.name, name:vertex.name });
+		});
+	}
+	
+	function requestPinList(vertexId, result) {
+		var vertex = self.currentGraph.getVertex(vertexId);
+		vertex.factory.pins.forEach(function(pin) {
+			result.push({name:pin.name, value:pin.name});
+		});
+		if (vertex.factory.isSubgraphParent) {
+			vertex.subgraph.propagatedPinRefs.forEach(function(pinref) {
+				//var pinInfo = pinref.vertex.resolvePin(pinref.pin);
+				result.push({name:pinref.name, value:pinref.name});
+			});
+		}
+	}
+	
+	this.propagatePopup = new PropagatePopup();
+	this.propagatePopup.on("hide", hide);
+	this.propagatePopup.on("propagate", propagate);
+	this.propagatePopup.on("requestModuleList", requestModuleList);
+	this.propagatePopup.on("requestPinList", requestPinList);
+	
+	document.body.appendChild(this.propagatePopup.container);
+}
+
+App.prototype.initUtilityPopup = function() {
+	var self = this;
+	
+	function hide() {
+		self.closeActivateParent(self.utilityPopup);
+	}
+		
+	this.utilityPopup = new UtilityPopup();
+	this.utilityPopup.on("hide", hide);
+	
+	document.body.appendChild(this.utilityPopup.container);
+}
+
+App.prototype.initSequencePopup = function() {
+	var self = this;
+	
+	function hide() {
+		self.closeActivateParent(self.sequencePopup);
+	}
+	
+	function requestPins(sequenceTrackIndex, result) {
+		// find and return automatable pins for all vertices in the top level graph
+		// TODO: dont return pins propagated in a different track, a pin can only be automated from one track
+		// TODO: set selected:bool if enumeated pin was already propagated in this track?
+
+		var sequenceTrack = self.project.sequenceTracks[sequenceTrackIndex];
+		
+		self.project.graph.vertices.forEach(function(vertex) {
+			if (vertex.factory.isSubgraphParent) {
+				vertex.subgraph.propagatedPinRefs.forEach(function(pinref) {
+					var pinInfo = pinref.vertex.resolvePin(pinref.pin);
+					var pin = pinInfo.resolvedPin;
+					var selected = sequenceTrack && !!sequenceTrack.getColumn(vertex, pinref.name);
+					if (pin.type == 0 || pin.type == 2 || pin.type == 4) {
+						result.push({
+							vertex:vertex.name, pin:pinref.name, type:pin.type, selected:selected
+						});
+					}					
+				});
+			}
+			
+			vertex.factory.pins.forEach(function(pin) {
+				// hvis pin er in-int, in-float, eller in-midi (0,2 og 4)
+				if (pin.type == 0 || pin.type == 2 || pin.type == 4) {
+					var selected = sequenceTrack && !!sequenceTrack.getColumn(vertex, pin.name);
+					result.push({
+						vertex:vertex.name, pin:pin.name, type:pin.type, selected:selected
+					});
+				}
+			});
+		});
+	}
+
+	function setPins(sequenceTrackIndex, pins) {
+		// now create or update that track!
+		var sequenceTrack;
+		if (sequenceTrackIndex != -1) {
+			sequenceTrack = self.project.sequenceTracks[sequenceTrackIndex];
+			sequenceTrack.columns = [];
+			console.log("lookup");
+		} else {
+			sequenceTrack = self.project.createSequenceTrack();
+			self.project.createPattern(sequenceTrack, 64);
+		}
+
+		pins.forEach(function(pin) {
+			var vertex = self.project.graph.getVertex(pin.vertex);
+			self.project.addSequenceTrackColumn(sequenceTrack, vertex, pin.pin);
+			
+			// TODO: make sure its propagated too! - and should unpropagate (automatable) pins not referenced from a sequence??
+		});
+	}
+
+	this.sequencePopup = new SequencePopup();
+	this.sequencePopup.on("hide", hide);
+	this.sequencePopup.on("requestPins", requestPins);
+	this.sequencePopup.on("setPins", setPins);
+	
+	document.body.appendChild(this.sequencePopup.container);
+}
+/*
+App.prototype.resolveSubgraphInstanceVertexIndex = function(graph, vertex) {
+	if (graph.parent) {
+	
+		var result = this.resolveSubgraphInstanceVertexIndex(graph.parent, graph.parentVertex);
+		var parentVertexPtr = Module._linx_graph_instance_get_vertex_instance(result.graphPtr, result.vertexIndex);
+		var subgraphPtr = Module._linx_vertex_instance_get_subgraph(parentVertexPtr);
+		var index = graph.vertices.indexOf(vertex);
+		return { graphPtr: subgraphPtr, vertexIndex : index };
+	} else {
+		// at the root, 
+		var index = graph.vertices.indexOf(vertex);
+		return { graphPtr: this.webAudioNode.instancePtr, vertexIndex : index };
+	}		
+}
+*/
+App.prototype.initParameterPopup = function(vertex) {
+	var self = this;
+	
+	function hide() {
+		self.closeActivateParent(parameterPopup);
+		document.body.removeChild(parameterPopup.container);
+		
+		var index = self.floatingPopups.indexOf(parameterPopup);
+		self.floatingPopups.splice(index, 1);
+	}
+	
+	function rename(graphId, id, newName) {
+		// the project graph only use object references to vertices, renaming is easy
+		var projectGraph = self.project.getGraphByIdentifier(graphId);
+		var vertex = projectGraph.getVertex(id);
+		self.project.renameVertex(vertex, newName);
+
+		// the graph editor uses string references to vertices, so its easiest to rebind completely
+		//self.bindGraphEditor();
+	}
+
+	function parameterChange(graphId, vertex, pinName, value) {
+	
+		//var graphId = self.project.getGraphIdentifier(self.currentGraph);
+		self.audioClient.parameterChange(graphId, vertex, pinName, value);
+
+		// set init value in document
+		var projectGraph = self.project.getGraphByIdentifier(graphId);
+		var projectVertex = projectGraph.getVertex(vertex);
+		var pinInfo = projectVertex.resolvePin(pinName);
+		pinInfo.resolvedVertex.setInitValue(pinInfo.resolvedPin.name, value);
+	}
+
+	function processNote(graphId, vertex, pinName, note, velocity) {
+		self.audioClient.processNote(graphId, vertex, pinName, note, velocity);
+	}
+	
+	function noteOn(graphId, vertex, pinName, note) {
+		processNote(graphId, vertex, pinName, 24 + note, 127);
+		//console.log("set note for " + vertex + "." + pinName + ": " + note);
+	}
+
+	function noteOff(graphId, vertex, pinName, note) {
+		processNote(graphId, vertex, pinName, 24 + note, 0);
+	}
+	
+	function describeValue(graphId, vertexId, pinName, value, callback) {
+		self.audioClient.describeValue(graphId, vertexId, pinName, value, callback);
+	}
+	
+	function getPinTypeString(pinType) {
+		if (pinType == 0) {
+			return "float";
+		} else if (pinType == 2) {
+			return "int";
+		} else if (pinType == 4) {
+			return "midinote";
+		}
+		return null;
+	}
+	
+	var parameterPopup = new ParameterPopup();
+	parameterPopup.on("hide", hide);
+	parameterPopup.on("rename", rename);
+	parameterPopup.on("change", parameterChange);
+	parameterPopup.on("noteon", noteOn);
+	parameterPopup.on("noteoff", noteOff);
+	parameterPopup.on("describeValue", describeValue);
+
+	var sliders = [];
+	vertex.factory.pins.forEach(function(pin) {
+		var pinInfo = vertex.resolvePin(pin.name);
+		var pinType = getPinTypeString(pinInfo.resolvedPin.type);
+
+		if (pinType) {
+			sliders.push({
+				name : pin.name,
+				value : vertex.getInitValue(pin.name),
+				pinType : pinType,
+				minValue : pinInfo.resolvedPin.minValue,
+				maxValue : pinInfo.resolvedPin.maxValue,
+				defaultValue : pinInfo.resolvedPin.defaultValue,
+				precision : pinInfo.resolvedPin.precision
+			});
+		}
+	});
+	
+	if (vertex.factory.isSubgraphParent) {
+		vertex.subgraph.propagatedPinRefs.forEach(function(pinref) {
+			var pinInfo = pinref.vertex.resolvePin(pinref.pin);
+			var pinType = getPinTypeString(pinInfo.resolvedPin.type);
+
+			if (pinType) {
+			//if (pinInfo.resolvedPin.type == 0 || pinInfo.resolvedPin.type == 2 || pinInfo.resolvedPin.type == 4) {
+				sliders.push({
+					name : pinref.name,
+					value : vertex.getInitValue(pinref.name),
+					pinType : pinType,
+					minValue : pinInfo.resolvedPin.minValue,
+					maxValue : pinInfo.resolvedPin.maxValue,
+					defaultValue : pinInfo.resolvedPin.defaultValue,
+					precision : pinInfo.resolvedPin.precision
+				});
+			}
+		});
+	}
+
+	var graphId = this.project.getGraphIdentifier(self.currentGraph);		
+	parameterPopup.bindVertex(graphId, vertex.name, vertex.name, sliders);
+
+	//parameterPopup.container.style.left = vertex.x;
+	
+	document.body.appendChild(parameterPopup.container);
+	return parameterPopup;
+}
+
+App.prototype.initGraphEditor = function() {
+	var self = this;
+	var copyGraph = null;
+	var copySubgraphs = null;
+
+	function charKeydown(keyString) {
+		self.modulePopup.show();
+		self.modulePopup.filterTextbox.value = keyString;
+		self.inputStack.push(self.modulePopup);
+	}
+	
+	function editConnection(targetVertex, sourceVertex) {
+		var edges = [];
+		self.currentGraph.edges.forEach(function(edge) {
+			var targetName;
+			var sourceName;
+			if (edge.sourceVertex == self.currentGraph.parentVertex) {
+				sourceName = "PARENT_IN";
+			} else {
+				sourceName = edge.sourceVertex.name;
+			}
+			if (edge.targetVertex == self.currentGraph.parentVertex) {
+				targetName = "PARENT_OUT";
+			} else {
+				targetName = edge.targetVertex.name;
+			}
+			
+			if (sourceName == sourceVertex.id && targetName == targetVertex.id) {
+				edges.push({ target : edge.to_pin, source : edge.from_pin });
+			}
+		});
+		self.connectionPopup.bindVertices(targetVertex.id, sourceVertex.id, edges);
+		self.connectionPopup.show();
+		self.inputStack.push(self.connectionPopup);
+	}
+	
+	function doubleClick(vertex) {
+		if (!vertex) {
+			// .. module popup
+			self.modulePopup.show();
+			self.modulePopup.filterTextbox.value = "";
+			self.inputStack.push(self.modulePopup);
+		} else if (vertex.id == "PARENT_IN" || vertex.id == "PARENT_OUT") {
+			;
+		} else /*if (vertex.id == "PROPAGATE") {
+			// special vertex
+			var propagations = self.currentGraph.propagatedPinRefs.map(function(propagation) {
+				return {name : propagation.name, vertex : propagation.vertex.name, pin : propagation.pin};
+			});
+			self.propagatePopup.bindPropagations(propagations);
+			self.propagatePopup.show();
+			self.inputStack.push(self.propagatePopup);
+		} else*/ {
+			// .. non-modal dialogish thing w/parameters
+			
+			var parameterPopup = self.getFloatingPopupForType(ParameterPopup, {vertexId : vertex.id});
+			if (parameterPopup) {
+				parameterPopup.show();
+				self.inputStack.push(parameterPopup);
+			} else {
+				var projectVertex = self.currentGraph.getVertex(vertex.id);
+				parameterPopup = self.initParameterPopup(projectVertex);
+				parameterPopup.show();
+				self.inputStack.push(parameterPopup);
+				self.floatingPopups.push(parameterPopup); // will be activated when clicked
+			}
+		}
+	}
+	
+	function move(vertices) {
+		vertices.forEach(function(vertex) {
+			if (vertex.id == "PROPAGATE" || vertex.id == "PARENT_IN" || vertex.id == "PARENT_OUT") {
+				return ;
+			}
+
+			var projectVertex = self.currentGraph.getVertex(vertex.id);
+			projectVertex.x = vertex.x;
+			projectVertex.y = vertex.y;
+		});
+	}
+	
+	function enterSubgraph() {
+		if (self.graphEditor.selectedVertices.length == 0) {
+			console.log("enterSubgraph: no selecteded vertex");
+			return ;
+		}
+
+		var graphVertex = self.graphEditor.selectedVertices[0];
+		if (graphVertex.id == "PROPAGATE" || graphVertex.id == "PARENT_IN" || graphVertex.id == "PARENT_OUT") {
+			return ;
+		}
+		
+		var subgraphVertex = self.currentGraph.getVertex(graphVertex.id);
+		
+		if (!subgraphVertex.subgraph) {
+			console.log("enterSubgraph: selected vertex does not support subgraph");
+			return;
+		}
+		
+		self.currentGraph = subgraphVertex.subgraph;
+		self.bindGraphEditor();
+	}
+	
+	function leaveSubgraph() {
+		if (self.currentGraph.parent) {
+			self.currentGraph = self.currentGraph.parent;
+			self.bindGraphEditor();
+		} else {
+			console.log("leaveSubgraph: cant leave root subgraph");
+		}
+	}
+	
+	function requestGraphPath(result) {
+		var g = self.currentGraph;
+		var names = [];
+		while (g.parent) {
+			names.unshift(g.parentVertex.name);
+			g = g.parent;
+		}
+		
+		if (self.project.name) {
+			names.unshift(self.project.name);
+		} else {
+			names.unshift("New project");
+		}
+		
+		result.value = names.join(" &#9656; ");
+	}
+
+	
+	function deleteVertices(vertices) {
+		vertices.forEach(function(vertex) {
+			var projectVertex = self.currentGraph.getVertex(vertex.id);
+			self.project.removeVertex(self.currentGraph, projectVertex);
+		});
+	}
+	
+	function requestEdgeDigest(callback) {
+		// set message.buffer to digest, scale raw values to -1..1 here, because the graph doesnt know anything about pin ranges
+		var graphId = self.project.getGraphIdentifier(self.currentGraph);
+		self.audioClient.getEdgeDigest(graphId, callback);
+	}
+	
+	function copy() {
+		var copyVertices = [];
+		for (var i = 0; i < self.graphEditor.selectedVertices.length; i++) {
+			var selectedVertex = self.graphEditor.selectedVertices[i];
+			var copyVertex = self.currentGraph.getVertex(selectedVertex.name);
+			copyVertices.push(copyVertex);
+		}
+		
+		var objectFactories = [];
+		
+		copySubgraphs = [];
+		copyGraph = self.project.saveJsonGraph(self.currentGraph, copySubgraphs, objectFactories, copyVertices);
+		console.log(copyGraph);
+		console.log(copySubgraphs);
+	}
+	
+	function cut() {
+		copy();
+		deleteVertices(self.graphEditor.selectedVertices);
+	}
+	
+	function paste() {
+		if (!copyGraph) {
+			console.log("nothing to paste");
+			return ;
+		}
+
+		self.project.parseJsonGraph(self.currentGraph.parentVertex, self.currentGraph, copyGraph, copySubgraphs);
+	}
+	
+	function utility() {
+		// show and focus utility dialog
+		self.showUtilityPopup();
+	}
+
+	this.graphEditorVertexStyles = [
+		new GraphitorVertexStyle("#000000", "#A9AEC7", "#000000"),
+		new GraphitorVertexStyle("#000000", "#C7ADA9", "#000000"),
+		new GraphitorVertexStyle("#000000", "#C6BEAA", "#000000"),
+		new GraphitorVertexStyle("#000000", "#ADC7A9", "#000000")
+	];
+
+	this.graphEditor = new Graphitor(this.mainContainer, { edgeDigest:true });
+	this.graphEditor.on("charKeydown", charKeydown);
+	this.graphEditor.on("editConnection", editConnection);
+	this.graphEditor.on("doubleClick", doubleClick);
+	this.graphEditor.on("move", move);
+	this.graphEditor.on("deleteVertices", deleteVertices);
+	this.graphEditor.on("enterSubgraph", enterSubgraph);
+	this.graphEditor.on("leaveSubgraph", leaveSubgraph);
+	this.graphEditor.on("requestGraphPath", requestGraphPath);
+	this.graphEditor.on("requestEdgeDigest", requestEdgeDigest);
+	this.graphEditor.on("copy", copy);
+	this.graphEditor.on("cut", cut);
+	this.graphEditor.on("paste", paste);
+
+	this.graphEditor.on("utility", utility);
+}
+
+App.prototype.bindGraphEditor = function() {
+
+	this.graphEditor.clear();
+	this.graphEditor.updatePath();
+	
+	if (this.currentGraph.parentVertex) {
+		this.graphEditor.addVertex("PARENT_IN", "Parent:In", -0.9, -0.9, this.graphEditorVertexStyles[3]);
+		this.graphEditor.addVertex("PARENT_OUT", "Parent:Out", 0.9, 0.9, this.graphEditorVertexStyles[3]);
+	}
+	
+	//this.graphEditor.addVertex("PROPAGATE", "Propagate", 0, 0.8, this.graphEditorVertexStyles[2]);
+
+	var d = 1 / this.currentGraph.vertices.length * Math.PI * 2;
+	for (var i = 0; i < this.currentGraph.vertices.length; i++) {
+		var v = this.currentGraph.vertices[i];
+		var styleIndex = v.factory.isSubgraphParent ? 0 : 1;
+		this.graphEditor.addVertex(v.name, v.name, v.x, v.y, this.graphEditorVertexStyles[styleIndex]);
+	}
+
+	for (var i = 0; i < this.currentGraph.edges.length; i++) {
+		var e = this.currentGraph.edges[i];
+		var targetName;
+		var sourceName;
+		if (e.targetVertex == this.currentGraph.parentVertex) {
+			targetName = "PARENT_OUT";
+		} else {
+			targetName = e.targetVertex.name;
+		}
+		if (e.sourceVertex == this.currentGraph.parentVertex) {
+			sourceName = "PARENT_IN";
+		} else {
+			sourceName = e.sourceVertex.name;
+		}
+		this.graphEditor.addEdge(targetName, sourceName);
+	}
+
+}
+
+App.prototype.initPatternEditor = function() {
+
+	var self = this;
+
+	function newPattern(vertexName) {
+		var sequenceTrack = self.project.getSequenceTrackByVertexName(vertexName);
+		var pattern = self.project.createPattern(sequenceTrack, 64);
+		self.bindPatternEditor(vertexName, pattern.name);
+	}
+
+	function newCopyPattern(vertexName, fromPatternName) {
+		console.log("copy pa" + vertexName + ", srcpa=" + fromPatternName);
+		var sequenceTrack = self.project.getSequenceTrackByVertexName(vertexName);
+		var fromPattern = sequenceTrack.getPattern(fromPatternName);
+		var pattern = self.project.createPattern(sequenceTrack, 64);
+		
+		fromPattern.columns.forEach(function(fromColumn) {
+			//var toColumn = pattern.getColumn(fromColumn.name);
+			fromColumn.events.forEach(function(fromEvent) {
+				self.project.setPatternEventAt(pattern, fromColumn.name, fromEvent.time, fromEvent.value);
+			});
+		});
+		
+		self.bindPatternEditor(vertexName, pattern.name);
+	}
+
+	function leavePattern() {
+		self.showSequenceEditor();
+	}
+	
+	function requestContainerList(result) {
+		self.project.sequenceTracks.forEach(function(sequenceTrack, index) {
+			result.push({name : "Track " + (index + 1).toString(), value:index});
+		});
+	}
+
+	function requestPatternList(containerIndex, result) {
+		var sequenceTrack = self.project.sequenceTracks[containerIndex];
+		if (!sequenceTrack) {
+			return ;
+		}
+		sequenceTrack.patterns.forEach(function(pattern, index) {
+			result.push({name:pattern.name, value:index});
+		});
+	}
+	
+	function requestBaseColumns(containerIndex, patternIndex, baseColumns) {
+		var sequenceTrack = self.project.sequenceTracks[containerIndex];
+		var pattern = sequenceTrack.patterns[patternIndex];
+
+		sequenceTrack.columns.forEach(function(column) {
+			
+			var pinInfo = column.vertex.resolvePin(column.pin);
+			var pinType = pinInfo.resolvedPin.type;
+			var minValue = pinInfo.resolvedPin.minValue;
+			var maxValue = pinInfo.resolvedPin.minValue;
+			var name = column.pin;//pinInfo.resolvedPin.name;
+
+			if (pinType == 4) {
+				baseColumns.push(new PatternEditorBaseColumn(column.vertex, name, pinType, "midi", 0, 0));
+			} else if (pinType == 0) {
+				baseColumns.push(new PatternEditorBaseColumn(column.vertex, name, pinType, "float", minValue, maxValue));
+			} else if (pinType == 2) {
+				baseColumns.push(new PatternEditorBaseColumn(column.vertex, name, pinType, "word", minValue, maxValue));
+			}
+		});
+	}
+	
+	function requestPatternValues(containerIndex, patternIndex, baseColumn, fromTime, toTime, values) {
+		var sequenceTrack = self.project.sequenceTracks[containerIndex];
+		var pattern = sequenceTrack.patterns[patternIndex];
+
+		pattern.events.forEach(function(patternEvent) {
+			if (patternEvent.vertex == baseColumn.vertex && patternEvent.pin == baseColumn.name && patternEvent.time >= fromTime && patternEvent.time < toTime) {
+				values.push({timestamp : patternEvent.time, value : patternEvent.value});
+			}
+		});
+	}
+	
+	function setPatternValue(containerIndex, patternIndex, baseColumn, timestamp, value) {
+		var sequenceTrack = self.project.sequenceTracks[containerIndex];
+		var pattern = sequenceTrack.patterns[patternIndex];
+
+		self.project.setPatternEventAt(pattern, baseColumn.vertex, baseColumn.name, timestamp, value);
+	}
+	
+	function selectPattern(containerIndex, patternIndex) {
+		console.log("select pattern", containerIndex, patternIndex);
+		self.bindPatternEditor(containerIndex, patternIndex);
+	}
+	
+	function shiftPattern(containerIndex, patternIndex, baseColumn, cursorTime, deltaTime) {
+		var sequenceTrack = self.project.sequenceTracks[containerIndex];
+		var pattern = sequenceTrack.patterns[patternIndex];
+		self.project.shiftPatternEvents(pattern, cursorTime, deltaTime);
+	}
+
+	this.patternEditor = new PatternEditor(this.mainContainer);	
+	this.patternEditor.on("newPattern", newPattern);
+	this.patternEditor.on("newCopyPattern", newCopyPattern);
+	this.patternEditor.on("leavePattern", leavePattern);
+	this.patternEditor.on("requestContainerList", requestContainerList);
+	this.patternEditor.on("requestPatternList", requestPatternList);
+	this.patternEditor.on("requestBaseColumns", requestBaseColumns);
+	this.patternEditor.on("requestPatternValues", requestPatternValues);
+	this.patternEditor.on("selectPattern", selectPattern);
+	this.patternEditor.on("setPatternValue", setPatternValue);
+	this.patternEditor.on("shiftPattern", shiftPattern);
+}
+
+App.prototype.bindPatternEditor = function(containerIndex, patternIndex) {
+
+	var sequenceTrack = this.project.sequenceTracks[containerIndex];//getSequenceTrackByVertexName(pluginName);
+	var pattern = sequenceTrack ? sequenceTrack.patterns[patternIndex] : null;
+	var rows = pattern ? pattern.rows : 0;
+
+	this.patternEditor.updateContainerList();
+	this.patternEditor.pluginList.value = containerIndex;
+	
+	this.patternEditor.updatePatternList();	
+	this.patternEditor.patternList.value = patternIndex;
+
+	this.patternEditor.createPatternEditor(containerIndex, patternIndex, rows);
+}
+
+App.prototype.initSequenceEditor = function() {
+
+	var self = this;
+
+	function gotoPattern(sequenceTrackIndex, patternIndex) {
+		//var sequenceTrack = self.project.sequenceTracks[sequenceTrackIndex];
+		//var pattern = sequenceTrack.patterns[patternIndex];
+		self.bindPatternEditor(sequenceTrackIndex, patternIndex);
+		self.showPatternEditor();
+	}
+	
+	function newTrack() {
+		self.showSequencePopup(-1);
+	}
+	
+	function editTrack(sequenceTrackIndex) {
+		console.log("start edit track", sequenceTrackIndex);
+		self.showSequencePopup(sequenceTrackIndex);
+	}
+
+	this.sequenceEditor = new SequenceEditor(this.mainContainer, this.project);
+	this.sequenceEditor.on("gotoPattern", gotoPattern);
+	this.sequenceEditor.on("newTrack", newTrack);
+	this.sequenceEditor.on("editTrack", editTrack);
+}
+
+App.prototype.bindSequenceEditor = function() {
+	this.sequenceEditor.updateCanvas();
+}
+
+App.prototype.showPatternEditor = function() {
+	this.patternEditor.show();
+	this.graphEditor.hide();
+	this.sequenceEditor.hide();
+	this.inputStack = [ this.patternEditor ];
+	
+	this.viewToolbar.highlight(this.viewToolbar.patternButton);
+}
+
+App.prototype.showGraphEditor = function() {
+	this.patternEditor.hide();
+	this.graphEditor.show();
+	this.sequenceEditor.hide();
+	this.inputStack = [ this.graphEditor ];
+	
+	this.viewToolbar.highlight(this.viewToolbar.graphButton);
+}
+
+App.prototype.showSequenceEditor = function() {
+	this.patternEditor.hide();
+	this.graphEditor.hide();
+	this.sequenceEditor.show();
+	this.inputStack = [ this.sequenceEditor ];
+	
+	this.viewToolbar.highlight(this.viewToolbar.sequenceButton);
+}
+
+App.prototype.showPropagatePopup = function() {
+	var propagations = this.currentGraph.propagatedPinRefs.map(function(propagation) {
+		return {name : propagation.name, vertex : propagation.vertex.name, pin : propagation.pin};
+	});
+	this.propagatePopup.bindPropagations(propagations);
+	this.propagatePopup.show();
+	this.inputStack.push(this.propagatePopup);
+}
+
+App.prototype.showOpenPopup = function() {
+	this.jsonPopup.show();
+	this.inputStack.push(this.jsonPopup);
+}
+
+App.prototype.showSavePopup = function() {
+	this.bindSavePopup();
+	this.savePopup.show();
+	this.inputStack.push(this.savePopup);
+}
+
+App.prototype.showUtilityPopup = function() {
+	this.utilityPopup.show();
+	this.inputStack.push(this.utilityPopup);
+}
+
+App.prototype.showSequencePopup = function(index) {
+	this.sequencePopup.show();
+	this.inputStack.push(this.sequencePopup);
+
+	this.sequencePopup.bind(index);
+}
+
+App.prototype.initKeyboard = function() {
+	var self = this;
+
+	function keyDown(e) {
+		var panel = self.inputStack[self.inputStack.length - 1];
+		switch (e.keyCode) {
+			// global keyboard handling, F2 = focus pattern editor, F3 = focus graph, Ctrl+S = json popup
+			case 112: // f1
+				self.aboutPopup.show();
+				self.inputStack.push(self.aboutPopup);
+				e.preventDefault();
+				break;
+			case 113: // f2
+				self.showPatternEditor();
+				e.preventDefault();
+				break;
+			case 114: // f3
+				self.showGraphEditor();
+				e.preventDefault();
+				break;
+			case 115: // f4
+				self.showSequenceEditor();
+				e.preventDefault();
+				break;
+			case 116: // f5
+				self.audioClient.play();
+				e.preventDefault();
+				break;
+			case 117: // f6
+				self.audioClient.setPosition(self.sequenceEditor.cursorScreenRow * self.sequenceEditor.skipRows);
+				self.audioClient.play();
+				e.preventDefault();
+				break;
+			case 119: // f8
+				self.audioClient.stop();
+				e.preventDefault();
+				break;
+			default:
+				if (e.keyCode == 76 && e.ctrlKey) {
+					// ctrl+l - load json
+					self.showOpenPopup();
+					e.preventDefault();
+				} else if (e.keyCode == 83 && e.ctrlKey) {
+					// ctrl+s - save?
+					self.showSavePopup();
+					e.preventDefault();
+				} else if (e.keyCode == 80 && e.ctrlKey) {
+					// ctrl+p - ?
+					e.preventDefault();
+				} else if (e.keyCode == 87 && e.ctrlKey) {
+					// ctrl+w - at least not close the tab
+					e.preventDefault();
+				} else {
+					//console.log(e.keyCode);
+					//if (panel.keyDown) panel.keyDown(e);
+					//console.log("prev");
+					//e.preventDefault();
+					//e.stopPropagation();
+				}
+				break;
+		}
+	}
+
+	window.addEventListener("keydown", keyDown);
+	//document.addEventListener("keydown", keyDown);
+}
+
+App.prototype.getFloatingPopupForElement = function(target) {
+	for (var i = 0; i < this.floatingPopups.length; i++) {
+		var popup = this.floatingPopups[i];
+		if (popup.container == target || popup.container.contains(target)) {
+			return popup;
+		}
+	}
+	return null;
+}
+
+App.prototype.getFloatingPopupForType = function(type, withMembers) {
+	for (var i = 0; i < this.floatingPopups.length; i++) {
+		var popup = this.floatingPopups[i];
+		if (popup instanceof type) {
+			var hasMembers = true;
+			for (var withKey in withMembers) {
+				if (popup[withKey] != withMembers[withKey]) {
+					hasMembers = false;
+				}
+			}
+			if (!hasMembers) {
+				continue;
+			}
+			return popup;
+		}
+	}
+	return null;
+}
+
+App.prototype.closeActivateParent = function(fromPanel) {
+	if (this.inputStack[this.inputStack.length - 1] == fromPanel) {
+		this.inputStack.pop();
+	}
+	this.inputStack[this.inputStack.length - 1].show();	
+}
+
+App.prototype.mouseDownActivate = function(e) {
+	// activate/deactivate floating popups
+	var popup = this.getFloatingPopupForElement(e.target);
+	var topPopup = this.getFloatingPopupForElement(this.inputStack[this.inputStack.length - 1].container);
+	if (popup && topPopup && popup != topPopup) {
+		console.log("deactivate previous floating popup");
+		this.inputStack.pop();
+	}
+	
+	if (popup && this.inputStack[this.inputStack.length - 1] != popup) {
+		console.log("activate");
+		this.inputStack.push(popup);
+	} else if (!popup && topPopup) {
+		this.inputStack.pop();
+	}
+}
+
+App.prototype.initMouse = function() {
+	var self = this;
+
+	function mouseDown(e) {
+		self.mouseDownActivate(e);
+
+		/*var panel = self.inputStack[self.inputStack.length - 1];
+		if (panel.mouseDown) panel.mouseDown(e);*/
+	}
+
+/*	function mouseMove(e) {
+		var panel = self.inputStack[self.inputStack.length - 1];
+		if (panel.mouseMove) panel.mouseMove(e);
+	}
+
+	function mouseUp(e) {
+		var panel = self.inputStack[self.inputStack.length - 1];
+		if (panel.mouseUp) panel.mouseUp(e);
+	}
+	
+	function mouseDblclick(e) {
+		var panel = self.inputStack[self.inputStack.length - 1];
+		if (panel.mouseDblclick) panel.mouseDblclick(e);
+	}*/
+
+	document.addEventListener("mousedown", mouseDown);
+/*	document.addEventListener("mousemove", mouseMove);
+	document.addEventListener("mouseup", mouseUp);
+	document.addEventListener("dblclick", mouseDblclick);*/
+}
+
+App.prototype.initStorage = function() {
+	var self = this;
+	
+	function storageReady(created) {
+		if (created) {
+			self.importDefaultProjects();
+		} else {
+			self.updatePluginProjectHeaders();
+		}
+	}
+
+	this.storage = new LinxStorage(false);
+	this.storage.on("ready", storageReady);
+}
+
+App.prototype.updatePluginProjectHeaders = function(callback) {
+	console.log("enumerating project headers");
+	var self = this;
+	this.storage.getPluginProjectHeaders(function(result) {
+		console.log("loaded " + result.length + " plugin headers");
+		console.log(result);
+		self.pluginProjectHeaders = result;
+		
+		self.jsonPopup.updateResourceList();
+	});
+}
+
+App.prototype.importDefaultProjects = function(callback) {	
+	var defaultProjectUrls = [
+		"http://modulyzer.com/json/simplesynth.json",
+		"http://modulyzer.com/json/simplekarplus.json",
+		"http://modulyzer.com/json/wobblesynth.json",
+		"http://modulyzer.com/json/simplekick.json",
+		"http://modulyzer.com/json/simplebass.json",
+		"http://modulyzer.com/json/simpledelay.json",
+		"http://modulyzer.com/json/simplereverb.json"
+	];
+
+	var counter = 0;
+	var self = this;
+	
+	function done() {
+		counter++;
+		if (counter == defaultProjectUrls.length) {
+			if (callback) callback();
+			self.updatePluginProjectHeaders();
+		}
+	}
+	
+	function success(data) {
+		self.storage.savePluginProject(data);
+		done();
+	}
+	
+	defaultProjectUrls.forEach(function(defaultProjectUrl) {
+		Ajax.getJSON(defaultProjectUrl, success, done);
+	});
+
+}
+
+App.prototype.deleteDatabase = function() {
+	this.storage.deleteDatabase();
+}
+
+App.prototype.recompileProject = function() {
+	var objectProject = this.project.saveJsonProject();
+	this.audioClient.compileProject(objectProject);
+}
+
+App.prototype.makeMaster = function() {
+	// called from the graph editor's utility popup
+	var instanceName = this.currentGraph.getNewVertexName("Master");
+	var factory = this.project.getFactory("stereocontainer");
+	
+	var master = this.project.addVertex(this.currentGraph, instanceName, factory);
+	
+	// TODO: add gain between subin and subout and propagate amp pin
+	this.project.addEdge(master.subgraph, master, "Sub In", master, "Sub Out");
+	
+	// propagate master's "Left Out" and "Right Out" in current graph
+	var leftPinIndex = factory.getPinIndex("Left Out");
+	var leftPin = factory.pins[leftPinIndex];
+	var rightPinIndex = factory.getPinIndex("Right Out");
+	var rightPin = factory.pins[rightPinIndex];	
+	
+	this.project.addPin(this.currentGraph, "Left Out", master, leftPin.name);
+	this.project.addPin(this.currentGraph, "Right Out", master, rightPin.name);
+}
+
+App.prototype.wrapStereo = function() {
+	// called from the graph editor's utility popup
+	var self = this;
+	var vertices = this.currentGraph.vertices.slice();
+	var edges = this.currentGraph.edges.slice();
+	var pinrefs = this.currentGraph.propagatedPinRefs.slice();
+
+	var instanceName = this.currentGraph.getNewVertexName("stereocontainer");
+	var factory = this.project.getFactory("stereocontainer");
+	var stereoContainer = this.project.addVertex(this.currentGraph, instanceName, factory);
+
+	var newGraph = stereoContainer.subgraph;
+	vertices.forEach(function(vertex) {
+		self.project.removeVertex(self.currentGraph, vertex);
+		newGraph.importVertex(vertex);
+	});
+	edges.forEach(function(edge) {
+		newGraph.edges.push(edge);
+	});
+	pinrefs.forEach(function(pinref) {
+		newGraph.propagatedPinRefs.push(pinref);
+	});
+}
+
+var app = new App();
+
+</script>
+</body>
+</html>

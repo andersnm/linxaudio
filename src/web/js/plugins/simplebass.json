@@ -1,0 +1,426 @@
+{
+  "system": {
+    "uniqueId": "NOID",
+    "product": "SimpleBass",
+    "author": "Andy Dubya",
+    "myjsonId": ""
+  },
+  "factories": [
+    {
+      "name": "oscbuffer",
+      "symbol": "oscbuffer_factory",
+      "file": "oscbuffer.obj",
+      "deps": [
+        "inertia.obj"
+      ]
+    },
+    {
+      "name": "svf",
+      "symbol": "svf_factory",
+      "file": "svf.obj",
+      "deps": []
+    },
+    {
+      "name": "midinote",
+      "symbol": "midinotesplit_factory",
+      "file": "midinotesplit.obj",
+      "deps": []
+    },
+    {
+      "name": "adsrvalue",
+      "symbol": "adsrvalue_factory",
+      "file": "adsrvalue.obj",
+      "deps": []
+    },
+    {
+      "name": "notefrequency",
+      "symbol": "notefrequency_factory",
+      "file": "notefrequency.obj",
+      "deps": []
+    },
+    {
+      "name": "uservalue_hertz",
+      "symbol": "uservalue_hertz_factory",
+      "file": "uservalue.obj",
+      "deps": []
+    },
+    {
+      "name": "uservalue_f0_1",
+      "symbol": "uservalue_f0_1_factory",
+      "file": "uservalue.obj",
+      "deps": []
+    },
+    {
+      "name": "arithmeticvalue",
+      "symbol": "arithmeticvalue_factory",
+      "file": "arithmeticvalue.obj",
+      "deps": []
+    }
+  ],
+  "targets": [
+    {
+      "name": "plain-win32",
+      "arch": "i386",
+      "postfix": ".dll",
+      "deps": [
+        "math_x86.obj",
+        "graph.obj",
+        "ftol2.obj",
+        "chkstk.obj",
+        "memcpy.obj",
+        "memset.obj"
+      ],
+      "exports": [
+        "linx_host_get_graph"
+      ],
+      "paths": [
+        "lib/cl-x86"
+      ]
+    },
+    {
+      "name": "vst-win32",
+      "arch": "i386",
+      "postfix": "VST.dll",
+      "deps": [
+        "vsthost.obj",
+        "commonhost.obj",
+        "math_x86.obj",
+        "graph.obj",
+        "ftol2.obj",
+        "chkstk.obj",
+        "memcpy.obj",
+        "memset.obj"
+      ],
+      "exports": [
+        "VSTPluginMain",
+        "linx_host_get_graph"
+      ],
+      "paths": [
+        "lib/cl-x86"
+      ]
+    },
+    {
+      "name": "vst-win64",
+      "arch": "x64",
+      "postfix": "VST64.dll",
+      "deps": [
+        "vsthost.obj",
+        "commonhost.obj",
+        "math_sse.obj",
+        "fminfmax.obj",
+        "graph.obj",
+        "chkstk.obj",
+        "memcpy.obj",
+        "memset.obj"
+      ],
+      "exports": [
+        "VSTPluginMain",
+        "linx_host_get_graph"
+      ],
+      "paths": [
+        "lib/cl-x64"
+      ]
+    },
+    {
+      "name": "buzz-win32",
+      "arch": "i386",
+      "postfix": "Buzz.dll",
+      "deps": [
+        "buzzhost.obj",
+        "commonhost.obj",
+        "math_x86.obj",
+        "graph.obj",
+        "ftol2.obj",
+        "chkstk.obj",
+        "memcpy.obj",
+        "memset.obj",
+        "thiscall.obj",
+        "mman.obj"
+      ],
+      "exports": [
+        "GetInfo",
+        "CreateMachine",
+        "linx_host_get_graph"
+      ],
+      "paths": [
+        "lib/cl-x86"
+      ]
+    }
+  ],
+  "graph": {
+    "vertices": [
+      {
+        "name": "oscbuffer",
+        "factory": "oscbuffer",
+        "subgraph": null,
+        "values": {
+          "Amp": 0,
+          "Waveform": 3
+        },
+        "x": -0.2796486090775989,
+        "y": 0.24518388791593693
+      },
+      {
+        "name": "svf",
+        "factory": "svf",
+        "subgraph": null,
+        "values": {},
+        "x": 0.2884333821376277,
+        "y": 0.5796847635726793
+      },
+      {
+        "name": "svf2",
+        "factory": "svf",
+        "subgraph": null,
+        "values": {},
+        "x": 0.6207906295754024,
+        "y": 0.5691768826619962
+      },
+      {
+        "name": "midinote",
+        "factory": "midinote",
+        "subgraph": null,
+        "values": {
+          "MidiChannel": 0
+        },
+        "x": -0.2942898975109808,
+        "y": -0.6147110332749564
+      },
+      {
+        "name": "adsrvalue",
+        "factory": "adsrvalue",
+        "subgraph": null,
+        "values": {
+          "Sustain": 1
+        },
+        "x": -0.2825768667642753,
+        "y": -0.03677758318739044
+      },
+      {
+        "name": "notefrequency",
+        "factory": "notefrequency",
+        "subgraph": null,
+        "values": {},
+        "x": -0.5329428989751098,
+        "y": -0.06129597197898429
+      },
+      {
+        "name": "user_cutoff",
+        "factory": "uservalue_hertz",
+        "subgraph": null,
+        "values": {
+          "In": 1348
+        },
+        "x": 0.30600292825768705,
+        "y": -0.6567425569176886
+      },
+      {
+        "name": "user_reso",
+        "factory": "uservalue_f0_1",
+        "subgraph": null,
+        "values": {
+          "In": 0.35
+        },
+        "x": 0.5651537335285504,
+        "y": -0.670753064798599
+      },
+      {
+        "name": "adsrdecay",
+        "factory": "arithmeticvalue",
+        "subgraph": null,
+        "values": {
+          "Rhs": 0,
+          "Type": 2
+        },
+        "x": 0.023426061493411532,
+        "y": -0.04028021015761807
+      },
+      {
+        "name": "adsrusercut",
+        "factory": "arithmeticvalue",
+        "subgraph": null,
+        "values": {
+          "Lhs": 3000
+        },
+        "x": 0.29721815519765715,
+        "y": 0.19439579684763575
+      },
+      {
+        "name": "user_decay",
+        "factory": "uservalue_f0_1",
+        "subgraph": null,
+        "values": {
+          "In": 0
+        },
+        "x": 0.02635431918008757,
+        "y": -0.6252189141856391
+      },
+      {
+        "name": "decayscale",
+        "factory": "arithmeticvalue",
+        "subgraph": null,
+        "values": {
+          "Rhs": 0,
+          "Type": 2
+        },
+        "x": 0.026720351390922104,
+        "y": -0.3520140105078807
+      },
+      {
+        "name": "transpose",
+        "factory": "arithmeticvalue",
+        "subgraph": null,
+        "values": {
+          "Rhs": -12
+        },
+        "x": -0.5358711566617863,
+        "y": -0.3800350262697023
+      }
+    ],
+    "edges": [
+      {
+        "from_vertex": "oscbuffer",
+        "from_pin": "Out",
+        "to_vertex": "svf",
+        "to_pin": "In"
+      },
+      {
+        "from_vertex": "svf",
+        "from_pin": "Out",
+        "to_vertex": "svf2",
+        "to_pin": "In"
+      },
+      {
+        "from_vertex": "midinote",
+        "from_pin": "OutTrigger",
+        "to_vertex": "adsrvalue",
+        "to_pin": "Trigger"
+      },
+      {
+        "from_vertex": "adsrvalue",
+        "from_pin": "Out",
+        "to_vertex": "oscbuffer",
+        "to_pin": "Amp"
+      },
+      {
+        "from_vertex": "notefrequency",
+        "from_pin": "OutFreq",
+        "to_vertex": "oscbuffer",
+        "to_pin": "Frequency"
+      },
+      {
+        "from_vertex": "user_reso",
+        "from_pin": "Out",
+        "to_vertex": "svf",
+        "to_pin": "Resonance"
+      },
+      {
+        "from_vertex": "user_reso",
+        "from_pin": "Out",
+        "to_vertex": "svf2",
+        "to_pin": "Resonance"
+      },
+      {
+        "from_vertex": "adsrvalue",
+        "from_pin": "Out",
+        "to_vertex": "adsrdecay",
+        "to_pin": "Lhs"
+      },
+      {
+        "from_vertex": "user_cutoff",
+        "from_pin": "Out",
+        "to_vertex": "adsrusercut",
+        "to_pin": "Rhs"
+      },
+      {
+        "from_vertex": "adsrusercut",
+        "from_pin": "Out",
+        "to_vertex": "svf",
+        "to_pin": "Cutoff"
+      },
+      {
+        "from_vertex": "user_decay",
+        "from_pin": "Out",
+        "to_vertex": "decayscale",
+        "to_pin": "Lhs"
+      },
+      {
+        "from_vertex": "decayscale",
+        "from_pin": "Out",
+        "to_vertex": "adsrdecay",
+        "to_pin": "Rhs"
+      },
+      {
+        "from_vertex": "adsrusercut",
+        "from_pin": "Out",
+        "to_vertex": "svf2",
+        "to_pin": "Cutoff"
+      },
+      {
+        "from_vertex": "adsrdecay",
+        "from_pin": "Out",
+        "to_vertex": "adsrusercut",
+        "to_pin": "Lhs"
+      },
+      {
+        "from_vertex": "user_cutoff",
+        "from_pin": "Out",
+        "to_vertex": "decayscale",
+        "to_pin": "Rhs"
+      },
+      {
+        "from_vertex": "midinote",
+        "from_pin": "OutNote",
+        "to_vertex": "transpose",
+        "to_pin": "Lhs"
+      },
+      {
+        "from_vertex": "transpose",
+        "from_pin": "Out",
+        "to_vertex": "notefrequency",
+        "to_pin": "In"
+      }
+    ],
+    "pins": [
+      {
+        "name": "Out",
+        "vertex": "svf2",
+        "pin": "Out"
+      },
+      {
+        "name": "Cutoff",
+        "vertex": "user_cutoff",
+        "pin": "In"
+      },
+      {
+        "name": "Reso",
+        "vertex": "user_reso",
+        "pin": "In"
+      },
+      {
+        "name": "Decay",
+        "vertex": "user_decay",
+        "pin": "In"
+      },
+      {
+        "name": "Waveform",
+        "vertex": "oscbuffer",
+        "pin": "Waveform"
+      },
+      {
+        "name": "Midi",
+        "vertex": "midinote",
+        "pin": "MidiIn"
+      }
+    ]
+  },
+  "subgraphs": [],
+  "sequence": {
+    "bpm": 126,
+    "tpb": 4,
+    "key": 0,
+    "scale": "major",
+    "length": 4096,
+    "tracks": []
+  }
+}

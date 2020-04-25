@@ -1,0 +1,244 @@
+{
+  "system": {
+    "uniqueId": "Y0Y2",
+    "product": "SimpleDelay",
+    "author": "Andy Wong"
+  },
+  "factories": [
+    {
+      "name": "gain",
+      "symbol": "gain_factory",
+      "file": "gain.obj",
+      "deps": [
+        "inertia.obj"
+      ]
+    },
+    {
+      "name": "svf",
+      "symbol": "svf_factory",
+      "file": "svf.obj",
+      "deps": []
+    },
+    {
+      "name": "delay",
+      "symbol": "delay_factory",
+      "file": "delay.obj",
+      "deps": []
+    }
+  ],
+  "targets": [
+    {
+      "name": "plain-win32",
+      "arch": "i386",
+      "postfix": ".dll",
+      "deps": [
+        "math_x86.obj",
+        "graph.obj",
+        "ftol2.obj",
+        "chkstk.obj",
+        "memcpy.obj",
+        "memset.obj"
+      ],
+      "exports": [
+        "linx_host_get_graph"
+      ],
+      "paths": [
+        "lib/cl-x86"
+      ]
+    },
+    {
+      "name": "vst-win32",
+      "arch": "i386",
+      "postfix": "VST.dll",
+      "deps": [
+        "vsthost.obj",
+        "commonhost.obj",
+        "math_x86.obj",
+        "graph.obj",
+        "ftol2.obj",
+        "chkstk.obj",
+        "memcpy.obj",
+        "memset.obj"
+      ],
+      "exports": [
+        "VSTPluginMain",
+        "linx_host_get_graph"
+      ],
+      "paths": [
+        "lib/cl-x86"
+      ]
+    },
+    {
+      "name": "vst-win64",
+      "arch": "x64",
+      "postfix": "VST64.dll",
+      "deps": [
+        "vsthost.obj",
+        "commonhost.obj",
+        "math_sse.obj",
+        "fminfmax.obj",
+        "graph.obj",
+        "chkstk.obj",
+        "memcpy.obj",
+        "memset.obj"
+      ],
+      "exports": [
+        "VSTPluginMain",
+        "linx_host_get_graph"
+      ],
+      "paths": [
+        "lib/cl-x64"
+      ]
+    },
+    {
+      "name": "buzz-win32",
+      "arch": "i386",
+      "postfix": "Buzz.dll",
+      "deps": [
+        "buzzhost.obj",
+        "commonhost.obj",
+        "math_x86.obj",
+        "graph.obj",
+        "ftol2.obj",
+        "chkstk.obj",
+        "memcpy.obj",
+        "memset.obj",
+        "thiscall.obj",
+        "mman.obj"
+      ],
+      "exports": [
+        "GetInfo",
+        "CreateMachine",
+        "linx_host_get_graph"
+      ],
+      "paths": [
+        "lib/cl-x86"
+      ]
+    }
+  ],
+  "graph": {
+    "vertices": [
+      {
+        "name": "delay",
+        "factory": "delay",
+        "subgraph": "subgraph0",
+        "values": {},
+        "x": 0,
+        "y": 0.5
+      }
+    ],
+    "edges": [],
+    "pins": [
+      {
+        "name": "In",
+        "vertex": "delay",
+        "pin": "In"
+      },
+      {
+        "name": "Out",
+        "vertex": "delay",
+        "pin": "Out"
+      },
+      {
+        "name": "Delay",
+        "vertex": "delay",
+        "pin": "DelayMs"
+      },
+      {
+        "name": "Feedback",
+        "vertex": "delay",
+        "pin": "Amp"
+      },
+      {
+        "name": "Type",
+        "vertex": "delay",
+        "pin": "Type"
+      },
+      {
+        "name": "Cutoff",
+        "vertex": "delay",
+        "pin": "Cutoff"
+      },
+      {
+        "name": "Resonance",
+        "vertex": "delay",
+        "pin": "Resonance"
+      },
+      {
+        "name": "Dry",
+        "vertex": "delay",
+        "pin": "DryGain"
+      },
+      {
+        "name": "Wet",
+        "vertex": "delay",
+        "pin": "WetGain"
+      }
+    ]
+  },
+  "subgraphs": [
+    {
+      "vertices": [
+        {
+          "name": "gain",
+          "factory": "gain",
+          "subgraph": null,
+          "values": {},
+          "x": 0,
+          "y": 0.5
+        },
+        {
+          "name": "svf",
+          "factory": "svf",
+          "subgraph": null,
+          "values": {},
+          "x": 6.123233995736766e-17,
+          "y": -0.5
+        }
+      ],
+      "edges": [
+        {
+          "from_vertex": "PARENT",
+          "from_pin": "SubOut",
+          "to_vertex": "svf",
+          "to_pin": "In"
+        },
+        {
+          "from_vertex": "svf",
+          "from_pin": "Out",
+          "to_vertex": "gain",
+          "to_pin": "In"
+        },
+        {
+          "from_vertex": "gain",
+          "from_pin": "Out",
+          "to_vertex": "PARENT",
+          "to_pin": "SubIn"
+        }
+      ],
+      "pins": [
+        {
+          "name": "Amp",
+          "vertex": "gain",
+          "pin": "Amp"
+        },
+        {
+          "name": "Type",
+          "vertex": "svf",
+          "pin": "Type"
+        },
+        {
+          "name": "Cutoff",
+          "vertex": "svf",
+          "pin": "Cutoff"
+        },
+        {
+          "name": "Resonance",
+          "vertex": "svf",
+          "pin": "Resonance"
+        }
+      ],
+      "name": "subgraph0"
+    }
+  ]
+}
